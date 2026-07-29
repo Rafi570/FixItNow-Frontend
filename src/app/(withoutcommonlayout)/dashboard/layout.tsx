@@ -1,22 +1,5 @@
+import AdminLayout from "@/src/components/layout/Adminlayout";
 
-import Footer from '@/src/components/share/Footer';
-import Navbar from '@/src/components/share/Navbar';
-import React, { ReactNode } from 'react';
-interface LayoutProps {
-  children: ReactNode;
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <AdminLayout>{children}</AdminLayout>;
 }
-
-const Layout = ({ children }: LayoutProps) => {
-  return (
-    <div>
-      <Navbar
-       />
-      <div className="">
-        {children}
-      </div>
-      <Footer />
-    </div>
-  );
-};
-
-export default Layout;
