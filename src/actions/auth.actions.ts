@@ -3,10 +3,8 @@
 import { cookies } from "next/headers";
 import { ActionResponse, LoginResponse, RegisterResponse } from "../types/auth";
 
-
-
-
-
+// ১. গ্লোবালি Base URL ডিক্লেয়ার করুন dynamic env থেকে
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
 export async function registerAction(formData: FormData): Promise<ActionResponse> {
   const name = formData.get("name") as string;
@@ -17,10 +15,8 @@ export async function registerAction(formData: FormData): Promise<ActionResponse
     return { success: false, message: "Name, email, and password are required" };
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://fix-it-now-prisma-backend.vercel.app/api";
-
   try {
-    const res = await fetch(`${baseUrl}/users/register`, {
+    const res = await fetch(`${BASE_URL}/users/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -40,6 +36,7 @@ export async function registerAction(formData: FormData): Promise<ActionResponse
 
     return { success: true, message: result.message };
   } catch (error: unknown) {
+    console.error("REGISTER_ACTION_ERROR:", error);
     return {
       success: false,
       message: "Something went wrong. Please try again later.",
@@ -49,12 +46,10 @@ export async function registerAction(formData: FormData): Promise<ActionResponse
 
 export async function logoutAction() {
   const cookieStore = await cookies();
-  // 'token' নামের কুকিটি ব্রাউজার এবং সার্ভার উভয় জায়গা থেকে ডিলেট করে দিবে
+  // 'token' নামের কুকিটি ব্রাউজার এবং সার্ভার উভয় জায়গা থেকে ডিলেট করে দিবে
   cookieStore.delete("token");
   return { success: true };
 }
-
-
 
 export async function loginAction(formData: FormData) {
   const email = formData.get("email") as string;
@@ -64,11 +59,9 @@ export async function loginAction(formData: FormData) {
     return { success: false, message: "Email and password are required" };
   }
 
-  // সরাসরি ব্যাকএন্ডের পূর্ণাঙ্গ লিঙ্ক
-  const baseUrl = "https://fix-it-now-prisma-backend.vercel.app/api";
-
   try {
-    const res = await fetch(`${baseUrl}/auth/login`, {
+    // 👈 এখন env ফাইল থেকে Dynamic Base URL যাবে
+    const res = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -100,10 +93,11 @@ export async function loginAction(formData: FormData) {
     return { success: true, message: result.message };
   } catch (error: any) {
     // 👈 টার্মিনালে আসল এরর প্রিন্ট হবে
-    console.error("LOGIN_ACTION_ERROR:", error); 
-    
+    console.error("LOGIN_ACTION_ERROR:", error);
+
     return {
       success: false,
-      message: error?.message || "Failed to connect to the server. Check internet/VPN.",
+      message: error?.message || "Failed to connect to the server. Check backend running status.",
     };
-  }}
+  }
+}

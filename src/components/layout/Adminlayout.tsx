@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -16,24 +16,81 @@ import {
   X,
   ChevronDown,
   ShieldAlert,
+  User,
 } from "lucide-react";
+import { logoutAction } from "@/src/actions/auth.actions";
 
+// Helper Function to decode JWT Payload client-side
+function parseJwt(token: string) {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
+// Master Nav Items with Allowed Roles
 const navItems = [
-  { label: "Overview", href: "/admin", icon: LayoutDashboard },
-  { label: "Users", href: "/admin/users", icon: Users },
-  { label: "Categories", href: "/admin/categories", icon: FolderKanban },
-  { label: "Bookings", href: "/admin/bookings", icon: CalendarCheck },
-  { label: "Technicians", href: "/admin/technicians", icon: Wrench },
+  { 
+    label: "Overview", 
+    href: "/dashboard", 
+    icon: LayoutDashboard,
+    roles: ["ADMIN", "CUSTOMER", "TECHNICIAN"] 
+  },
+  { 
+    label: "Users", 
+    href: "/dashboard/users", 
+    icon: Users,
+    roles: ["ADMIN"] // Only Admin can see
+  },
+  { 
+    label: "Categories", 
+    href: "/dashboard/categories", 
+    icon: FolderKanban,
+    roles: ["ADMIN"] // Only Admin can see
+  },
+  { 
+    label: "Bookings", 
+    href: "/dashboard/bookings", 
+    icon: CalendarCheck,
+    roles: ["ADMIN", "CUSTOMER", "TECHNICIAN"] 
+  },
+  { 
+    label: "Technicians", 
+    href: "/dashboard/technicians", 
+    icon: Wrench,
+    roles: ["ADMIN"] // Only Admin can see
+  },
 ];
 
 function Sidebar({
   mobileOpen,
   onClose,
+  userRole,
 }: {
   mobileOpen: boolean;
   onClose: () => void;
+  userRole: string;
 }) {
   const pathname = usePathname();
+
+  // Filter menu items based on logged in user role
+  const filteredNavItems = navItems.filter((item) =>
+    item.roles.includes(userRole)
+  );
+
+  const handleLogout = async () => {
+    await logoutAction();
+    window.location.href = "/";
+  };
 
   return (
     <>
@@ -53,7 +110,7 @@ function Sidebar({
       >
         {/* Logo Section */}
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/[0.08] px-6">
-          <Link href="/admin" className="flex items-center gap-2.5">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#D97706]/30 bg-gradient-to-br from-[#F59E0B]/20 via-[#D97706]/10 to-transparent shadow-sm shadow-[#D97706]/10">
               <Wrench className="h-4.5 w-4.5 text-[#D97706]" strokeWidth={2.25} />
             </span>
@@ -76,13 +133,13 @@ function Sidebar({
         {/* Section Title */}
         <div className="px-6 pb-2 pt-6">
           <p className="text-[10px] font-bold uppercase tracking-widest text-[#6B7280]">
-            Administration Panel
+            {userRole === "ADMIN" ? "Administration Panel" : "User Navigation"}
           </p>
         </div>
 
         {/* Nav Links */}
         <nav className="flex-1 space-y-1.5 px-3.5">
-          {navItems.map((item) => {
+          {filteredNavItems.map((item) => {
             const active = pathname === item.href;
             const Icon = item.icon;
             return (
@@ -115,13 +172,16 @@ function Sidebar({
         {/* Bottom Menu */}
         <div className="space-y-1.5 border-t border-white/[0.08] px-3.5 py-4">
           <Link
-            href="/admin/settings"
+            href="/dashboard/settings"
             className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[#9CA3AF] transition-colors hover:bg-white/[0.05] hover:text-[#F3F4F6]"
           >
             <Settings className="h-4.5 w-4.5 text-[#6B7280]" strokeWidth={2} />
             Settings
           </Link>
-          <button className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[#EF4444]/80 transition-colors hover:bg-[#EF4444]/10 hover:text-[#EF4444]">
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[#EF4444]/80 transition-colors hover:bg-[#EF4444]/10 hover:text-[#EF4444]"
+          >
             <LogOut className="h-4.5 w-4.5 text-[#EF4444]/80" strokeWidth={2} />
             Log out
           </button>
@@ -131,12 +191,25 @@ function Sidebar({
   );
 }
 
-function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
+function Topbar({
+  onMenuClick,
+  userEmail,
+  userRole,
+}: {
+  onMenuClick: () => void;
+  userEmail: string;
+  userRole: string;
+}) {
   const [profileOpen, setProfileOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await logoutAction();
+    window.location.href = "/login";
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[#E5E0D8] bg-[#FAF8F5]/90 px-4 backdrop-blur-md sm:px-8">
-      {/* Mobile Menu Button & Breadcrumb Title */}
+      {/* Mobile Menu Button & Title */}
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
@@ -147,21 +220,22 @@ function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
         </button>
 
         <div>
-          <h1 className="text-sm font-bold tracking-tight text-[#1E2026] sm:text-base">
-            Admin Dashboard
+          <h1 className="text-sm font-bold tracking-tight text-[#1E2026] sm:text-base capitalize">
+            {userRole.toLowerCase()} Dashboard
           </h1>
           <p className="hidden text-xs text-[#6B7280] sm:block">
-            Manage your platform services & users
+            Welcome back to your portal
           </p>
         </div>
       </div>
 
       {/* Right Controls */}
       <div className="flex items-center gap-3">
-        {/* System Badge */}
-        <span className="hidden items-center gap-1.5 rounded-full border border-[#D97706]/20 bg-[#D97706]/10 px-3 py-1 text-xs font-bold text-[#B45309] sm:flex">
-          <ShieldAlert className="h-3.5 w-3.5" /> System Live
-        </span>
+        {userRole === "ADMIN" && (
+          <span className="hidden items-center gap-1.5 rounded-full border border-[#D97706]/20 bg-[#D97706]/10 px-3 py-1 text-xs font-bold text-[#B45309] sm:flex">
+            <ShieldAlert className="h-3.5 w-3.5" /> System Live
+          </span>
+        )}
 
         {/* Notifications Button */}
         <button
@@ -178,11 +252,11 @@ function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
             onClick={() => setProfileOpen((v) => !v)}
             className="flex items-center gap-2.5 rounded-full border border-[#E5E0D8] bg-white p-1 pr-3 shadow-sm transition-all hover:border-[#D97706]/30"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-[#D97706] to-[#B45309] text-xs font-bold text-white shadow-sm">
-              A
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-[#D97706] to-[#B45309] text-xs font-bold text-white shadow-sm uppercase">
+              {userEmail ? userEmail[0] : "U"}
             </span>
-            <span className="hidden text-sm font-bold text-[#1E2026] sm:block">
-              Super Admin
+            <span className="hidden text-sm font-bold text-[#1E2026] sm:block capitalize">
+              {userRole === "ADMIN" ? "Super Admin" : userRole.toLowerCase()}
             </span>
             <ChevronDown
               className={`h-4 w-4 text-[#9CA3AF] transition-transform duration-200 ${
@@ -195,16 +269,21 @@ function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
             <div className="absolute right-0 top-[calc(100%+8px)] w-52 overflow-hidden rounded-2xl border border-[#E5E0D8] bg-white p-2 shadow-xl shadow-black/5 animate-in fade-in-50 zoom-in-95">
               <div className="border-b border-[#E5E0D8] px-3 py-2">
                 <p className="text-xs font-bold text-[#1E2026]">Logged in as</p>
-                <p className="truncate text-xs text-[#6B7280]">admin@fixitnow.com</p>
+                <p className="truncate text-xs text-[#6B7280]">
+                  {userEmail || "user@fixitnow.com"}
+                </p>
               </div>
               <div className="pt-1">
                 <Link
-                  href="/admin/settings"
+                  href="/dashboard/settings"
                   className="block rounded-xl px-3 py-2 text-sm font-medium text-[#4B5563] transition-colors hover:bg-[#FAF8F5] hover:text-[#1E2026]"
                 >
                   Account Settings
                 </Link>
-                <button className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-[#EF4444] transition-colors hover:bg-[#FEF2F2]">
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-[#EF4444] transition-colors hover:bg-[#FEF2F2]"
+                >
                   <LogOut className="h-4 w-4" />
                   Log out
                 </button>
@@ -223,7 +302,26 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userRole, setUserRole] = useState<string>("CUSTOMER");
+  const [userEmail, setUserEmail] = useState<string>("");
   const pathname = usePathname();
+
+  // Read cookie on client mount to decode JWT user role
+  useEffect(() => {
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(";").shift();
+      return null;
+    };
+
+    const token = getCookie("token");
+    if (token) {
+      const decoded = parseJwt(token);
+      if (decoded?.role) setUserRole(decoded.role);
+      if (decoded?.email) setUserEmail(decoded.email);
+    }
+  }, []);
 
   // Close mobile drawer on route change
   useEffect(() => {
@@ -232,10 +330,18 @@ export default function AdminLayout({
 
   return (
     <div className="flex min-h-screen bg-[#F4EFE6]">
-      <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
+      <Sidebar
+        mobileOpen={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        userRole={userRole}
+      />
 
       <div className="flex min-h-screen flex-1 flex-col">
-        <Topbar onMenuClick={() => setMobileOpen(true)} />
+        <Topbar
+          onMenuClick={() => setMobileOpen(true)}
+          userEmail={userEmail}
+          userRole={userRole}
+        />
         <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
