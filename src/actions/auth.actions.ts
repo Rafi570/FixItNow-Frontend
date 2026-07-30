@@ -101,3 +101,38 @@ export async function loginAction(formData: FormData) {
     };
   }
 }
+
+export async function getMeAction() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+  if (!token) {
+    return { success: false, message: "No token found" };
+  }
+
+  try {
+    const res = await fetch(`${BASE_URL}/users/me`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+
+    const result = await res.json();
+    if (!res.ok || !result.success) {
+      return {
+        success: false,
+        message: result.message || "Failed to fetch profile",
+      };
+    }
+
+    return { success: true, data: result.data };
+  } catch (error: any) {
+    console.error("GET_ME_ACTION_ERROR:", error);
+    return {
+      success: false,
+      message: error.message || "Something went wrong",
+    };
+  }
+}

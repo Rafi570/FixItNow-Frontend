@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Users,
   FolderKanban,
+  Grid,
   CalendarCheck,
   Wrench,
   Settings,
@@ -18,7 +19,7 @@ import {
   ShieldAlert,
   User,
 } from "lucide-react";
-import { logoutAction } from "@/src/actions/auth.actions";
+import { logoutAction, getMeAction } from "@/src/actions/auth.actions";
 
 // Helper Function to decode JWT Payload client-side
 function parseJwt(token: string) {
@@ -55,6 +56,12 @@ const navItems = [
     label: "Categories", 
     href: "/dashboard/categories", 
     icon: FolderKanban,
+    roles: ["ADMIN"] // Only Admin can see
+  },
+  { 
+    label: "Services", 
+    href: "/dashboard/services", 
+    icon: Grid,
     roles: ["ADMIN"] // Only Admin can see
   },
   { 
@@ -306,21 +313,25 @@ export default function AdminLayout({
   const [userEmail, setUserEmail] = useState<string>("");
   const pathname = usePathname();
 
-  // Read cookie on client mount to decode JWT user role
+  // Fetch current logged-in user profile from backend
   useEffect(() => {
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(";").shift();
-      return null;
+    const fetchUserProfile = async () => {
+      try {
+        const res = await getMeAction();
+        if (res.success && res.data) {
+          if (res.data.role) {
+            setUserRole(res.data.role);
+          }
+          if (res.data.email) {
+            setUserEmail(res.data.email);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      }
     };
 
-    const token = getCookie("token");
-    if (token) {
-      const decoded = parseJwt(token);
-      if (decoded?.role) setUserRole(decoded.role);
-      if (decoded?.email) setUserEmail(decoded.email);
-    }
+    fetchUserProfile();
   }, []);
 
   // Close mobile drawer on route change

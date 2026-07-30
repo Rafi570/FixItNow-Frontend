@@ -1,5 +1,6 @@
 import { getCategories } from "@/src/actions/category.actions";
 import CreateCategoryModal from "@/src/components/modules/admin/CreateCategoryModal";
+import CategoryList from "@/src/components/modules/admin/CategoryList";
 
 
 export default async function AdminCategoriesPage() {
@@ -24,19 +25,7 @@ export default async function AdminCategoriesPage() {
       </div>
 
       {/* Category List Table / Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {categories.map((cat) => (
-          <div
-            key={cat.id}
-            className="rounded-2xl border border-[#E5E0D8] bg-white p-5 shadow-xs transition-all hover:shadow-md"
-          >
-            <h3 className="text-lg font-bold text-[#1E2026]">{cat.name}</h3>
-            <p className="mt-1 line-clamp-2 text-xs text-[#6B7280]">
-              {cat.description || "No description available"}
-            </p>
-          </div>
-        ))}
-      </div>
+      <CategoryList initialCategories={categories} />
     </div>
   );
 }
