@@ -30,9 +30,13 @@ export default function LoginForm() {
     }
   };
 
+  const handleInputChange = () => {
+    if (error) setError(null);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-      <AuthError message={error} />
+      <AuthError key={error || ""} message={error} />
 
       {/* Email Field */}
       <div>
@@ -45,6 +49,7 @@ export default function LoginForm() {
             type="email"
             name="email"
             required
+            onChange={handleInputChange}
             placeholder="you@example.com"
             className="w-full rounded-xl border border-[#D97706]/20 bg-white py-3 pl-11 pr-4 text-sm text-[#1E2026] outline-none transition-all placeholder:text-[#9CA3AF] focus:border-[#D97706] focus:ring-2 focus:ring-[#D97706]/20 shadow-sm"
           />
@@ -70,6 +75,7 @@ export default function LoginForm() {
             type="password"
             name="password"
             required
+            onChange={handleInputChange}
             placeholder="••••••••"
             className="w-full rounded-xl border border-[#D97706]/20 bg-white py-3 pl-11 pr-4 text-sm text-[#1E2026] outline-none transition-all placeholder:text-[#9CA3AF] focus:border-[#D97706] focus:ring-2 focus:ring-[#D97706]/20 shadow-sm"
           />

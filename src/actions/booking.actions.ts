@@ -38,7 +38,7 @@ export async function getBookingsAction() {
 export async function updateAdminBookingStatusAction(id: string, status: string) {
   try {
     const headers = await getAuthHeader();
-    const res = await fetch(`${BASE_URL}/admin/bookings/${id}`, {
+    const res = await fetch(`${BASE_URL}/bookings/${id}/status`, {
       method: "PATCH",
       headers,
       body: JSON.stringify({ status }),

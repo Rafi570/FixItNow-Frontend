@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { Pencil, Trash2, X, Loader2, CheckCircle2, AlertCircle, Search, Filter, Calendar, MapPin } from "lucide-react";
 import { updateAdminBookingStatusAction, deleteAdminBookingAction } from "@/src/actions/booking.actions";
+import { createPaymentAction } from "@/src/actions/payment.actions";
 
 interface BookingListProps {
   initialBookings: any[];
+  userRole?: string | null;
 }
 
 const STATUS_OPTIONS = [
@@ -18,13 +20,51 @@ const STATUS_OPTIONS = [
   "CANCELLED",
 ];
 
-export default function BookingList({ initialBookings }: BookingListProps) {
+const getNextStatusOptions = (currentStatus: string) => {
+  switch (currentStatus) {
+    case "REQUESTED":
+      return ["REQUESTED", "ACCEPTED", "DECLINED", "CANCELLED"];
+    case "ACCEPTED":
+      return ["ACCEPTED", "PAID", "DECLINED", "CANCELLED"];
+    case "PAID":
+      return ["PAID", "IN_PROGRESS", "CANCELLED"];
+    case "IN_PROGRESS":
+      return ["IN_PROGRESS", "COMPLETED", "CANCELLED"];
+    case "COMPLETED":
+      return ["COMPLETED"];
+    case "DECLINED":
+      return ["DECLINED"];
+    case "CANCELLED":
+      return ["CANCELLED"];
+    default:
+      return STATUS_OPTIONS;
+  }
+};
+
+export default function BookingList({ initialBookings, userRole }: BookingListProps) {
   const [bookings, setBookings] = useState<any[]>(initialBookings);
   const [editBooking, setEditBooking] = useState<any | null>(null);
   const [deleteBookingId, setDeleteBookingId] = useState<string | null>(null);
+  const [payingId, setPayingId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const handlePayNow = async (bookingId: string) => {
+    setPayingId(bookingId);
+    try {
+      const res = await createPaymentAction(bookingId);
+      if (res.success && res.data?.paymentUrl) {
+        window.location.href = res.data.paymentUrl;
+      } else {
+        alert(res.message || "Failed to initiate payment. Please try again.");
+      }
+    } catch (err: any) {
+      alert(err.message || "Something went wrong.");
+    } finally {
+      setPayingId(null);
+    }
+  };
 
   // Search & Filter state
   const [searchTerm, setSearchTerm] = useState("");
@@ -218,20 +258,41 @@ export default function BookingList({ initialBookings }: BookingListProps) {
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={() => setEditBooking(b)}
-                      className="flex items-center gap-1 rounded-lg border border-[#E5E0D8] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#4B5563] transition-all hover:bg-[#FAF8F5] hover:text-[#1E2026]"
-                      title="Update Status"
-                    >
-                      <Pencil className="h-3.5 w-3.5" /> Status
-                    </button>
-                    <button
-                      onClick={() => setDeleteBookingId(b.id)}
-                      className="flex items-center gap-1 rounded-lg border border-[#FCA5A5] bg-[#FEF2F2] px-2.5 py-1.5 text-xs font-semibold text-[#EF4444] transition-all hover:bg-[#FEE2E2]"
-                      title="Delete Booking"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" /> Delete
-                    </button>
+                    {userRole !== "CUSTOMER" && (
+                      <button
+                        onClick={() => setEditBooking(b)}
+                        className="flex items-center gap-1 rounded-lg border border-[#E5E0D8] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#4B5563] transition-all hover:bg-[#FAF8F5] hover:text-[#1E2026]"
+                        title="Update Status"
+                      >
+                        <Pencil className="h-3.5 w-3.5" /> Status
+                      </button>
+                    )}
+                    {userRole === "ADMIN" && (
+                      <button
+                        onClick={() => setDeleteBookingId(b.id)}
+                        className="flex items-center gap-1 rounded-lg border border-[#FCA5A5] bg-[#FEF2F2] px-2.5 py-1.5 text-xs font-semibold text-[#EF4444] transition-all hover:bg-[#FEE2E2]"
+                        title="Delete Booking"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" /> Delete
+                      </button>
+                    )}
+                    {userRole === "CUSTOMER" && b.status === "ACCEPTED" && (
+                      <button
+                        onClick={() => handlePayNow(b.id)}
+                        disabled={payingId === b.id}
+                        className="flex items-center gap-1 rounded-lg border border-[#D97706] bg-[#D97706] px-3 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:bg-[#B45309] disabled:opacity-50"
+                        title="Pay with SSLCommerz"
+                      >
+                        {payingId === b.id ? (
+                          <>
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            Paying...
+                          </>
+                        ) : (
+                          "Pay Now"
+                        )}
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -309,7 +370,7 @@ export default function BookingList({ initialBookings }: BookingListProps) {
                   defaultValue={editBooking.status}
                   className="mt-1.5 w-full rounded-xl border border-[#E5E0D8] bg-[#FAF8F5] px-3.5 py-2.5 text-sm text-[#1E2026] outline-none transition-all focus:border-[#D97706] focus:ring-1 focus:ring-[#D97706]"
                 >
-                  {STATUS_OPTIONS.map((status) => (
+                  {getNextStatusOptions(editBooking.status).map((status) => (
                     <option key={status} value={status}>
                       {status}
                     </option>

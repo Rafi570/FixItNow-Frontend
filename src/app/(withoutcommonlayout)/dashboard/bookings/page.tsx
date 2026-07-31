@@ -1,9 +1,15 @@
 import { getBookingsAction } from "@/src/actions/booking.actions";
+import { getMeAction } from "@/src/actions/auth.actions";
 import BookingList from "@/src/components/modules/admin/BookingList";
 
 export default async function AdminBookingsPage() {
-  const res = await getBookingsAction();
-  const bookings = res?.success ? res.data : [];
+  const [bookingsRes, userRes] = await Promise.all([
+    getBookingsAction(),
+    getMeAction(),
+  ]);
+
+  const bookings = bookingsRes?.success ? bookingsRes.data : [];
+  const userRole = userRes?.success ? userRes.data?.role : null;
 
   return (
     <div className="space-y-6">
@@ -20,7 +26,7 @@ export default async function AdminBookingsPage() {
       </div>
 
       {/* Bookings Table Component */}
-      <BookingList initialBookings={bookings} />
+      <BookingList initialBookings={bookings} userRole={userRole} />
     </div>
   );
 }
