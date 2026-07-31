@@ -4,11 +4,11 @@ import { Wrench, User, LayoutDashboard } from "lucide-react";
 import NavSearch from "./NavSearch";
 import LogoutButton from "./LogoutButton";
 import MobileMenu from "./MobileMenu";
+import { getMeAction } from "../../actions/auth.actions";
 
 const navLinks = [
   { label: "Services", href: "/services" },
   { label: "Technicians", href: "/technicians" },
-  { label: "Categories", href: "/categories" },
 ];
 
 export default async function Navbar() {
@@ -16,6 +16,9 @@ export default async function Navbar() {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
   const isLoggedIn = !!token;
+
+  const meRes = await getMeAction();
+  const currentUser = meRes?.success ? meRes.data : null;
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#E7E2D8] bg-[#FBFAF7]/95 backdrop-blur supports-[backdrop-filter]:bg-[#FBFAF7]/80">
@@ -54,6 +57,9 @@ export default async function Navbar() {
         <div className="ml-auto hidden items-center gap-4 lg:flex">
           {isLoggedIn ? (
             <>
+              <span className="text-xs font-semibold text-[#5B6472]">
+                Hello, <span className="text-[#171B21] font-bold">{currentUser?.name || "User"}</span>
+              </span>
               <Link
                 href="/dashboard"
                 className="flex items-center gap-1.5 text-sm font-medium text-[#171B21] hover:text-[#E8912B] transition-colors"

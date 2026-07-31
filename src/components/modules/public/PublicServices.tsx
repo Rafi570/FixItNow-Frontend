@@ -64,6 +64,19 @@ export default function PublicServices({
     router.replace("/services");
   };
 
+  const selectedTechnicianId = searchParams.get("technician");
+  const selectedTechName = selectedTechnicianId
+    ? initialServices.find(
+        (s) => s.technicianId === selectedTechnicianId || s.technician?.id === selectedTechnicianId
+      )?.technician?.user?.name || "Selected Technician"
+    : null;
+
+  const handleClearTechnicianFilter = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("technician");
+    router.replace(`/services${params.toString() ? `?${params.toString()}` : ""}`);
+  };
+
   // Filter & Sort Logic
   const filteredServices = initialServices
     .filter((service) => {
@@ -85,7 +98,12 @@ export default function PublicServices({
       const minMatch = minPrice === "" ? true : priceVal >= Number(minPrice);
       const maxMatch = maxPrice === "" ? true : priceVal <= Number(maxPrice);
 
-      return searchMatch && categoryMatch && minMatch && maxMatch;
+      // 4. Technician match
+      const technicianMatch = selectedTechnicianId
+        ? service.technicianId === selectedTechnicianId || service.technician?.id === selectedTechnicianId
+        : true;
+
+      return searchMatch && categoryMatch && minMatch && maxMatch && technicianMatch;
     })
     .sort((a, b) => {
       if (sortOption === "price_asc") {
@@ -246,6 +264,24 @@ export default function PublicServices({
               </select>
             </div>
           </div>
+
+          {/* Technician Filter Active Banner */}
+          {selectedTechName && (
+            <div className="flex items-center justify-between rounded-2xl bg-amber-50 border border-amber-200/60 px-5 py-3 shadow-xs">
+              <div className="flex items-center gap-2 text-sm text-amber-800">
+                <Wrench className="h-4 w-4 text-[#D97706]" />
+                <span>
+                  Showing services provided by <strong className="font-extrabold">{selectedTechName}</strong>
+                </span>
+              </div>
+              <button
+                onClick={handleClearTechnicianFilter}
+                className="text-xs font-bold text-amber-900 hover:text-amber-700 bg-amber-100 hover:bg-amber-200/80 px-2.5 py-1 rounded-lg transition-all"
+              >
+                Clear Filter
+              </button>
+            </div>
+          )}
 
           {/* Services Grid */}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
