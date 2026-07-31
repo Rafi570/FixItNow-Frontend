@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { Search, SlidersHorizontal, ArrowUpDown, X, Loader2, CheckCircle2, AlertCircle, Calendar, MapPin, Wrench, Clock } from "lucide-react";
 import { createBookingAction } from "@/src/actions/booking.actions";
 
@@ -268,7 +269,9 @@ export default function PublicServices({
 
                   {/* Title & Desc */}
                   <h3 className="text-md font-bold text-[#1E2026] line-clamp-1 group-hover:text-[#B45309] transition-colors">
-                    {service.title}
+                    <Link href={`/services/${service.id}`} className="hover:underline">
+                      {service.title}
+                    </Link>
                   </h3>
                   <p className="mt-2 text-xs text-[#6B7280] line-clamp-3 min-h-[48px]">
                     {service.description || "No service details provided."}
@@ -295,12 +298,20 @@ export default function PublicServices({
                     <span className="text-xl font-extrabold text-[#1E2026]">${service.price}</span>
                   </div>
 
-                  <button
-                    onClick={() => setBookingService(service)}
-                    className="rounded-xl bg-[#171B21] hover:bg-[#E8912B] hover:text-[#171B21] px-4 py-2 text-xs font-bold text-white transition-all shadow-sm"
-                  >
-                    Book Now
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/services/${service.id}`}
+                      className="rounded-xl border border-[#E7E2D8] bg-white px-3.5 py-2 text-xs font-bold text-[#4B5563] transition-all hover:bg-[#FAF8F5] hover:text-[#1E2026] shadow-xs"
+                    >
+                      Details
+                    </Link>
+                    <button
+                      onClick={() => setBookingService(service)}
+                      className="rounded-xl bg-[#171B21] hover:bg-[#E8912B] hover:text-[#171B21] px-3.5 py-2 text-xs font-bold text-white transition-all shadow-sm"
+                    >
+                      Book Now
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

@@ -75,3 +75,21 @@ export async function deleteReviewAction(reviewId: string) {
     return { success: false, message: error.message || "Something went wrong" };
   }
 }
+
+export async function getServiceReviewsAction(serviceId: string) {
+  try {
+    const res = await fetch(`${BASE_URL}/reviews/service/${serviceId}`, {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    const result = await res.json();
+    if (!res.ok || !result.success) {
+      return { success: false, message: result.message || "Failed to fetch service reviews", data: [] };
+    }
+
+    return { success: true, data: result.data };
+  } catch (error: any) {
+    return { success: false, message: error.message || "Something went wrong", data: [] };
+  }
+}
