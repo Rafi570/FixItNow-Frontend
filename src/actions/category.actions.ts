@@ -9,7 +9,7 @@ export async function getCategories(): Promise<ICategoryResponse> {
   try {
     const res = await fetch(`${baseUrl}/categories`, {
       method: "GET",
-      cache: "no-store", // সবসময় ফ্রেশ ডেটা আনবে
+      next: { tags: ["categories"] },
     });
 
     if (!res.ok) {

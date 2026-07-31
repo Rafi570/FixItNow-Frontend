@@ -6,7 +6,7 @@ export async function getServicesAction() {
   try {
     const res = await fetch(`${baseUrl}/services`, {
       method: "GET",
-      cache: "no-store",
+      next: { tags: ["services"] },
     });
 
     const result = await res.json();
@@ -26,7 +26,7 @@ export async function getServiceByIdAction(id: string) {
   try {
     const res = await fetch(`${baseUrl}/services/${id}`, {
       method: "GET",
-      cache: "no-store",
+      next: { tags: ["services", `service-${id}`] },
     });
 
     const result = await res.json();

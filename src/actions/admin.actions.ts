@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://fix-it-now-prisma-backend.vercel.app/api";
 
@@ -43,6 +43,7 @@ export async function createCategoryAction(formData: FormData) {
 
     revalidatePath("/dashboard/categories");
     revalidatePath("/"); // Update home page categories as well
+    updateTag("categories");
     return { success: true, message: result.message || "Category created successfully!" };
   } catch (error: any) {
     return {
@@ -79,6 +80,7 @@ export async function updateCategoryAction(id: string, formData: FormData) {
 
     revalidatePath("/dashboard/categories");
     revalidatePath("/");
+    updateTag("categories");
     return { success: true, message: result.message || "Category updated successfully!" };
   } catch (error: any) {
     return {
@@ -107,6 +109,7 @@ export async function deleteCategoryAction(id: string) {
 
     revalidatePath("/dashboard/categories");
     revalidatePath("/");
+    updateTag("categories");
     return { success: true, message: result.message || "Category deleted successfully!" };
   } catch (error: any) {
     return {
@@ -169,7 +172,7 @@ export async function getTechniciansAction() {
   try {
     const res = await fetch(`${BASE_URL}/technicians`, {
       method: "GET",
-      cache: "no-store",
+      next: { tags: ["technicians"] },
     });
 
     const result = await res.json();
@@ -206,6 +209,7 @@ export async function createServiceAction(payload: {
 
     revalidatePath("/dashboard/categories");
     revalidatePath("/dashboard/services");
+    updateTag("services");
     return { success: true, message: result.message || "Service created successfully!" };
   } catch (error: any) {
     return { success: false, message: error.message || "Something went wrong" };
@@ -235,6 +239,8 @@ export async function updateServiceAction(id: string, payload: {
 
     revalidatePath("/dashboard/services");
     revalidatePath("/dashboard/categories");
+    updateTag("services");
+    updateTag(`service-${id}`);
     return { success: true, message: result.message || "Service updated successfully!" };
   } catch (error: any) {
     return { success: false, message: error.message || "Something went wrong" };
@@ -256,6 +262,8 @@ export async function deleteServiceAction(id: string) {
 
     revalidatePath("/dashboard/services");
     revalidatePath("/dashboard/categories");
+    updateTag("services");
+    updateTag(`service-${id}`);
     return { success: true, message: result.message || "Service deleted successfully!" };
   } catch (error: any) {
     return { success: false, message: error.message || "Something went wrong" };
