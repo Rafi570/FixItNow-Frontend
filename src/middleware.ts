@@ -53,7 +53,7 @@ export function middleware(request: NextRequest) {
 
   // ১. ইউজার অলরেডি লগইন থাকলে /login বা /register এ ঢুকতে দিবে না
   if (token && (pathname === "/login" || pathname === "/register")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   // ২. ইউজার লগইন না থাকলে প্রটেক্টেড রাউটে ঢুকতে দিবে না

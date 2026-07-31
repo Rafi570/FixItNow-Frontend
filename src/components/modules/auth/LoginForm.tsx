@@ -23,7 +23,7 @@ export default function LoginForm() {
     setLoading(false);
 
     if (res.success) {
-      router.replace("/dashboard");
+      router.replace("/");
       router.refresh();
     } else {
       setError(res.message);
