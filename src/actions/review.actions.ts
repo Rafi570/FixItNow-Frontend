@@ -93,3 +93,23 @@ export async function getServiceReviewsAction(serviceId: string) {
     return { success: false, message: error.message || "Something went wrong", data: [] };
   }
 }
+
+export async function getMyWorkReviewsAction() {
+  try {
+    const headers = await getAuthHeader();
+    const res = await fetch(`${BASE_URL}/reviews/my-work-reviews`, {
+      method: "GET",
+      headers,
+      cache: "no-store",
+    });
+
+    const result = await res.json();
+    if (!res.ok || !result.success) {
+      return { success: false, message: result.message || "Failed to fetch work reviews", data: [] };
+    }
+
+    return { success: true, data: result.data };
+  } catch (error: any) {
+    return { success: false, message: error.message || "Something went wrong", data: [] };
+  }
+}

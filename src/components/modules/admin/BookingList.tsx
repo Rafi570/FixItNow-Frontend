@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2, X, Loader2, CheckCircle2, AlertCircle, Search, Filter, Calendar, MapPin } from "lucide-react";
+import { Pencil, Trash2, X, Loader2, CheckCircle2, AlertCircle, Search, Filter, Calendar, MapPin, Eye, FileText, User, Wrench } from "lucide-react";
 import { updateAdminBookingStatusAction, deleteAdminBookingAction } from "@/src/actions/booking.actions";
 import { createPaymentAction } from "@/src/actions/payment.actions";
 import { createReviewAction, updateReviewAction, deleteReviewAction } from "@/src/actions/review.actions";
@@ -46,6 +46,7 @@ export default function BookingList({ initialBookings, userRole }: BookingListPr
   const [bookings, setBookings] = useState<any[]>(initialBookings);
   const [editBooking, setEditBooking] = useState<any | null>(null);
   const [deleteBookingId, setDeleteBookingId] = useState<string | null>(null);
+  const [selectedBookingDetail, setSelectedBookingDetail] = useState<any | null>(null);
   const [payingId, setPayingId] = useState<string | null>(null);
   const [reviewModal, setReviewModal] = useState<{
     bookingId: string;
@@ -332,6 +333,13 @@ export default function BookingList({ initialBookings, userRole }: BookingListPr
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => setSelectedBookingDetail(b)}
+                      className="flex items-center gap-1 rounded-lg border border-[#E5E0D8] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#4B5563] transition-all hover:bg-[#FAF8F5] hover:text-[#1E2026]"
+                      title="View Details"
+                    >
+                      <Eye className="h-3.5 w-3.5" /> Details
+                    </button>
                     {userRole !== "CUSTOMER" && (
                       <button
                         onClick={() => setEditBooking(b)}
@@ -641,6 +649,135 @@ export default function BookingList({ initialBookings, userRole }: BookingListPr
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* View Booking Details Modal */}
+      {selectedBookingDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+          <div className="relative w-full max-w-lg rounded-2xl border border-[#E5E0D8] bg-white p-6 shadow-2xl animate-in fade-in-50 zoom-in-95 max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setSelectedBookingDetail(null)}
+              className="absolute right-4 top-4 text-[#9CA3AF] hover:text-[#1E2026]"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="flex items-center gap-3 border-b border-[#E5E0D8] pb-4">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D97706]/10 text-[#D97706]">
+                <Eye className="h-5 w-5" />
+              </span>
+              <div>
+                <h3 className="text-lg font-bold text-[#1E2026]">Booking Details</h3>
+                <p className="text-xs text-[#6B7280]">
+                  Booking Reference ID: <span className="font-mono text-[10px] bg-gray-100 px-1 py-0.5 rounded">{selectedBookingDetail.id}</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 space-y-6">
+              {/* Service Information */}
+              <div className="rounded-xl border border-[#E5E0D8] bg-[#FAF8F5] p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="text-sm font-bold text-[#1E2026]">{selectedBookingDetail.service?.title || "N/A"}</h4>
+                    <p className="mt-1 text-xs text-[#6B7280]">
+                      {selectedBookingDetail.service?.description || "No description provided for this service."}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-extrabold text-[#D97706]">${selectedBookingDetail.price}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Grid for Customer and Technician info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Customer Information */}
+                <div className="rounded-xl border border-[#E5E0D8]/60 p-4 space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#4B5563]">
+                    <User className="h-4 w-4 text-[#D97706]" />
+                    <span>Customer Details</span>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-[#1E2026]">{selectedBookingDetail.customer?.name || "N/A"}</p>
+                    <p className="text-xs text-[#6B7280]">{selectedBookingDetail.customer?.email || "N/A"}</p>
+                  </div>
+                </div>
+
+                {/* Technician Information */}
+                <div className="rounded-xl border border-[#E5E0D8]/60 p-4 space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#4B5563]">
+                    <Wrench className="h-4 w-4 text-[#D97706]" />
+                    <span>Assigned Technician</span>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-[#1E2026]">{selectedBookingDetail.technician?.user?.name || "Unassigned"}</p>
+                    <p className="text-xs text-[#6B7280]">{selectedBookingDetail.technician?.user?.email || "N/A"}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Schedule and Location */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#4B5563]">Schedule & Location</h4>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="flex items-center gap-2 rounded-xl border border-[#E5E0D8]/60 px-3.5 py-2.5 bg-white">
+                    <Calendar className="h-4.5 w-4.5 text-[#D97706] shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-[#6B7280] uppercase tracking-wider font-bold">Scheduled At</p>
+                      <p className="text-xs font-semibold text-[#1E2026]">
+                        {new Date(selectedBookingDetail.scheduledAt).toLocaleString("en-US", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 rounded-xl border border-[#E5E0D8]/60 px-3.5 py-2.5 bg-white">
+                    <MapPin className="h-4.5 w-4.5 text-[#D97706] shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-[#6B7280] uppercase tracking-wider font-bold">Service Location</p>
+                      <p className="text-xs font-semibold text-[#1E2026] line-clamp-2">{selectedBookingDetail.address}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Customer Note / Special Instructions */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#4B5563]">
+                  <FileText className="h-4 w-4 text-[#D97706]" />
+                  <span>Customer's Special Instructions</span>
+                </div>
+                <div className="rounded-xl border border-[#E5E0D8] bg-amber-50/30 p-3.5 text-xs text-[#4B5563] italic leading-relaxed">
+                  {selectedBookingDetail.note ? `"${selectedBookingDetail.note}"` : "No special instructions or notes provided by the customer."}
+                </div>
+              </div>
+
+              {/* Status and Actions */}
+              <div className="flex items-center justify-between border-t border-[#E5E0D8] pt-4">
+                <div>
+                  <span className="text-xs text-[#6B7280] block mb-1">Booking Status</span>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold border ${getStatusBadgeStyles(
+                      selectedBookingDetail.status
+                    )}`}
+                  >
+                    {selectedBookingDetail.status}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedBookingDetail(null)}
+                  className="rounded-xl bg-[#1E2026] text-white px-5 py-2.5 text-sm font-bold shadow-sm transition-all hover:bg-black"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

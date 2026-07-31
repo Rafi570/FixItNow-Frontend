@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ShieldAlert,
   User,
+  Star,
 } from "lucide-react";
 import { logoutAction, getMeAction } from "@/src/actions/auth.actions";
 
@@ -69,6 +70,12 @@ const navItems = [
     href: "/dashboard/bookings", 
     icon: CalendarCheck,
     roles: ["ADMIN", "CUSTOMER", "TECHNICIAN"] 
+  },
+  {
+    label: "Reviews",
+    href: "/dashboard/reviews",
+    icon: Star,
+    roles: ["TECHNICIAN"] // Only Technicians see their reviews
   },
   { 
     label: "Technicians", 
