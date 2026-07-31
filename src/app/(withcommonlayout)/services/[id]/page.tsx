@@ -1,7 +1,7 @@
-import { getServiceByIdAction } from "@/src/actions/service.actions";
-import { getServiceReviewsAction } from "@/src/actions/review.actions";
-import { getMeAction } from "@/src/actions/auth.actions";
-import ServiceDetails from "@/src/components/modules/public/ServiceDetails";
+import { getServiceByIdAction } from "../../../../actions/service.actions";
+import { getServiceReviewsAction } from "../../../../actions/review.actions";
+import { getMeAction } from "../../../../actions/auth.actions";
+import ServiceDetails from "../../../../components/modules/public/ServiceDetails";
 import { notFound } from "next/navigation";
 
 export default async function ServiceDetailsPage({
