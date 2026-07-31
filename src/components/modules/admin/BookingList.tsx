@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pencil, Trash2, X, Loader2, CheckCircle2, AlertCircle, Search, Filter, Calendar, MapPin } from "lucide-react";
 import { updateAdminBookingStatusAction, deleteAdminBookingAction } from "@/src/actions/booking.actions";
 import { createPaymentAction } from "@/src/actions/payment.actions";
+import { createReviewAction, updateReviewAction, deleteReviewAction } from "@/src/actions/review.actions";
 
 interface BookingListProps {
   initialBookings: any[];
@@ -46,6 +47,12 @@ export default function BookingList({ initialBookings, userRole }: BookingListPr
   const [editBooking, setEditBooking] = useState<any | null>(null);
   const [deleteBookingId, setDeleteBookingId] = useState<string | null>(null);
   const [payingId, setPayingId] = useState<string | null>(null);
+  const [reviewModal, setReviewModal] = useState<{
+    bookingId: string;
+    reviewId: string | null;
+    rating: number;
+    comment: string;
+  } | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -63,6 +70,56 @@ export default function BookingList({ initialBookings, userRole }: BookingListPr
       alert(err.message || "Something went wrong.");
     } finally {
       setPayingId(null);
+    }
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewModal) return;
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      let res;
+      if (reviewModal.reviewId) {
+        res = await updateReviewAction(reviewModal.reviewId, reviewModal.rating, reviewModal.comment);
+      } else {
+        res = await createReviewAction(reviewModal.bookingId, reviewModal.rating, reviewModal.comment);
+      }
+
+      if (res.success) {
+        setMessage({ type: "success", text: res.message });
+        setReviewModal(null);
+        window.location.reload();
+      } else {
+        setMessage({ type: "error", text: res.message });
+      }
+    } catch (err: any) {
+      setMessage({ type: "error", text: err.message || "An error occurred" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!confirm("Are you sure you want to delete this review?")) return;
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const res = await deleteReviewAction(reviewId);
+      if (res.success) {
+        setMessage({ type: "success", text: res.message });
+        window.location.reload();
+      } else {
+        setMessage({ type: "error", text: res.message });
+      }
+    } catch (err: any) {
+      setMessage({ type: "error", text: err.message || "An error occurred" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -227,6 +284,23 @@ export default function BookingList({ initialBookings, userRole }: BookingListPr
                   <div className="text-xs text-[#6B7280]">
                     By: {b.customer?.name} ({b.customer?.email})
                   </div>
+                  {b.review && (
+                    <div className="mt-2 rounded-lg bg-amber-50/50 border border-amber-100 p-2 text-xs max-w-[250px]">
+                      <div className="flex items-center gap-1 font-semibold text-amber-800">
+                        Rating: {b.review.rating}/5
+                        {userRole === "ADMIN" && (
+                          <button
+                            onClick={() => handleDeleteReview(b.review.id)}
+                            className="ml-auto text-red-500 hover:text-red-700 transition-colors"
+                            title="Delete Review"
+                          >
+                            <Trash2 className="h-3 w-3 inline" />
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-gray-600 mt-0.5 italic">"{b.review.comment}"</p>
+                    </div>
+                  )}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-[#4B5563]">
                   {b.technician?.user?.name || "N/A"}
@@ -291,6 +365,22 @@ export default function BookingList({ initialBookings, userRole }: BookingListPr
                         ) : (
                           "Pay Now"
                         )}
+                      </button>
+                    )}
+                    {userRole === "CUSTOMER" && b.status === "COMPLETED" && (
+                      <button
+                        onClick={() => {
+                          setReviewModal({
+                            bookingId: b.id,
+                            reviewId: b.review?.id || null,
+                            rating: b.review?.rating || 5,
+                            comment: b.review?.comment || "",
+                          });
+                        }}
+                        className="flex items-center gap-1 rounded-lg border border-amber-600 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-700 transition-all hover:bg-amber-100"
+                        title={b.review ? "Edit Review" : "Give Review"}
+                      >
+                        {b.review ? "Edit Review" : "Give Review"}
                       </button>
                     )}
                   </div>
@@ -472,6 +562,85 @@ export default function BookingList({ initialBookings, userRole }: BookingListPr
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {reviewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl border border-[#E5E0D8] bg-white p-6 shadow-xl animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between border-b border-[#E5E0D8]/60 pb-3">
+              <h3 className="text-lg font-bold text-[#1E2026]">
+                {reviewModal.reviewId ? "Edit Review" : "Write a Review"}
+              </h3>
+              <button
+                onClick={() => setReviewModal(null)}
+                className="rounded-lg p-1 text-[#6B7280] hover:bg-[#FAF8F5] hover:text-[#1E2026]"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleReviewSubmit} className="mt-4 space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#4B5563]">
+                  Rating (1-5) *
+                </label>
+                <select
+                  name="rating"
+                  required
+                  value={reviewModal.rating}
+                  onChange={(e) => setReviewModal({ ...reviewModal, rating: Number(e.target.value) })}
+                  className="mt-1.5 w-full rounded-xl border border-[#E5E0D8] bg-[#FAF8F5] px-3.5 py-2.5 text-sm text-[#1E2026] outline-none transition-all focus:border-[#D97706] focus:ring-1 focus:ring-[#D97706]"
+                >
+                  {[5, 4, 3, 2, 1].map((r) => (
+                    <option key={r} value={r}>
+                      {r} Stars
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#4B5563]">
+                  Comment *
+                </label>
+                <textarea
+                  name="comment"
+                  required
+                  rows={4}
+                  value={reviewModal.comment}
+                  onChange={(e) => setReviewModal({ ...reviewModal, comment: e.target.value })}
+                  placeholder="Share your experience working with this technician..."
+                  className="mt-1.5 w-full rounded-xl border border-[#E5E0D8] bg-[#FAF8F5] px-3.5 py-2.5 text-sm text-[#1E2026] outline-none transition-all focus:border-[#D97706] focus:ring-1 focus:ring-[#D97706] resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setReviewModal(null)}
+                  className="rounded-xl px-4 py-2 text-sm font-semibold text-[#6B7280] hover:bg-[#FAF8F5]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex items-center gap-2 rounded-xl bg-[#D97706] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#B45309] disabled:opacity-50"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Review"
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
