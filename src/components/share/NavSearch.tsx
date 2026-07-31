@@ -4,26 +4,30 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 
-const categories = [
-  "All categories",
-  "Plumbing",
-  "Electrical",
-  "Cleaning",
-  "Painting",
-  "Carpentry",
-  "AC Repair",
-];
+interface Category {
+  id: string;
+  name: string;
+}
 
-export default function NavSearch() {
-  const [category, setCategory] = useState(categories[0]);
+interface NavSearchProps {
+  categories: Category[];
+}
+
+export default function NavSearch({ categories = [] }: NavSearchProps) {
+  const [category, setCategory] = useState("All categories");
   const [query, setQuery] = useState("");
   const router = useRouter();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    const params = new URLSearchParams();
     if (query.trim()) {
-      router.push(`/services?searchTerm=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}`);
+      params.set("searchTerm", query.trim());
     }
+    if (category !== "All categories") {
+      params.set("category", category);
+    }
+    router.push(`/services${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
   return (
@@ -33,11 +37,12 @@ export default function NavSearch() {
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           aria-label="Service category"
-          className="hidden shrink-0 border-r border-[#E7E2D8] bg-transparent py-2.5 pl-4 pr-2 text-sm text-[#171B21] outline-none sm:block"
+          className="hidden shrink-0 border-r border-[#E7E2D8] bg-transparent py-2.5 pl-4 pr-2 text-sm text-[#171B21] outline-none sm:block max-w-[150px] truncate"
         >
+          <option value="All categories">All categories</option>
           {categories.map((c) => (
-            <option key={c} value={c}>
-              {c}
+            <option key={c.id} value={c.name}>
+              {c.name}
             </option>
           ))}
         </select>

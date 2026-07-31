@@ -34,16 +34,25 @@ export default function PublicServices({
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingMessage, setBookingMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // Initialize filter from URL Search Query Params (for Homepage Category Redirection)
+  // Initialize filter from URL Search Query Params (for Homepage & Navbar Redirection)
   useEffect(() => {
     const categoryParam = searchParams.get("category");
     if (categoryParam) {
       const found = categories.find(
-        (c) => c.name.toLowerCase() === categoryParam.toLowerCase()
+        (c) => c.name.toLowerCase() === categoryParam.toLowerCase() || c.id === categoryParam
       );
       if (found) {
         setSelectedCategories([found.id]);
       }
+    } else {
+      setSelectedCategories([]);
+    }
+
+    const searchParam = searchParams.get("searchTerm");
+    if (searchParam) {
+      setSearchTerm(searchParam);
+    } else {
+      setSearchTerm("");
     }
   }, [searchParams, categories]);
 

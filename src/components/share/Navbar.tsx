@@ -5,6 +5,7 @@ import NavSearch from "./NavSearch";
 import LogoutButton from "./LogoutButton";
 import MobileMenu from "./MobileMenu";
 import { getMeAction } from "../../actions/auth.actions";
+import { getCategories } from "../../actions/category.actions";
 
 const navLinks = [
   { label: "Services", href: "/services" },
@@ -19,6 +20,9 @@ export default async function Navbar() {
 
   const meRes = await getMeAction();
   const currentUser = meRes?.success ? meRes.data : null;
+
+  const categoriesRes = await getCategories();
+  const navbarCategories = categoriesRes?.success ? categoriesRes.data : [];
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#E7E2D8] bg-[#FBFAF7]/95 backdrop-blur supports-[backdrop-filter]:bg-[#FBFAF7]/80">
@@ -51,7 +55,7 @@ export default async function Navbar() {
         </nav>
 
         {/* Search Bar Component */}
-        <NavSearch />
+        <NavSearch categories={navbarCategories} />
 
         {/* Right side Auth Action Buttons */}
         <div className="ml-auto hidden items-center gap-4 lg:flex">
