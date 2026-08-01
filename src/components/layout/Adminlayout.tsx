@@ -19,6 +19,7 @@ import {
   ShieldAlert,
   User,
   Star,
+  PlusCircle,
 } from "lucide-react";
 import { logoutAction, getMeAction } from "@/src/actions/auth.actions";
 
@@ -41,35 +42,53 @@ function parseJwt(token: string) {
 
 // Master Nav Items with Allowed Roles
 const navItems = [
-  { 
-    label: "Overview", 
-    href: "/dashboard", 
+  {
+    label: "Overview",
+    href: "/dashboard",
     icon: LayoutDashboard,
-    roles: ["ADMIN", "CUSTOMER", "TECHNICIAN"] 
+    roles: ["ADMIN", "CUSTOMER", "TECHNICIAN"]
   },
-  { 
-    label: "Users", 
-    href: "/dashboard/users", 
+  {
+    label: "Users",
+    href: "/dashboard/users",
     icon: Users,
     roles: ["ADMIN"] // Only Admin can see
   },
-  { 
-    label: "Categories", 
-    href: "/dashboard/categories", 
+  {
+    label: "Categories",
+    href: "/dashboard/categories",
     icon: FolderKanban,
     roles: ["ADMIN"] // Only Admin can see
   },
-  { 
-    label: "Services", 
-    href: "/dashboard/services", 
+  {
+    label: "Services",
+    href: "/dashboard/services",
     icon: Grid,
-    roles: ["ADMIN"] // Only Admin can see
+    roles: ["ADMIN"] // Only Admin can see the master platform services
   },
-  { 
-    label: "Bookings", 
-    href: "/dashboard/bookings", 
+  {
+    label: "Add Service",
+    href: "/dashboard/services/add",
+    icon: PlusCircle,
+    roles: ["ADMIN", "TECHNICIAN"]
+  },
+  {
+    label: "My Services",
+    href: "/dashboard/my-services",
+    icon: Wrench,
+    roles: ["TECHNICIAN"] // Only Technicians see their individual services
+  },
+  {
+    label: "Bookings",
+    href: "/dashboard/bookings",
     icon: CalendarCheck,
-    roles: ["ADMIN", "CUSTOMER", "TECHNICIAN"] 
+    roles: ["ADMIN", "CUSTOMER", "TECHNICIAN"]
+  },
+  {
+    label: "Applications",
+    href: "/dashboard/applications",
+    icon: Wrench,
+    roles: ["ADMIN"] // Only Admin can see technician applications
   },
   {
     label: "Reviews",
@@ -111,9 +130,8 @@ function Sidebar({
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-white/10 bg-[#0F1115] shadow-2xl transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-white/10 bg-[#0F1115] shadow-2xl transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         {/* Logo Section */}
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/[0.08] px-6">
@@ -153,21 +171,19 @@ function Sidebar({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`group relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-200 ${
-                  active
+                className={`group relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-200 ${active
                     ? "bg-gradient-to-r from-[#D97706]/20 to-[#D97706]/5 text-[#F3F4F6] shadow-sm shadow-[#D97706]/10 border border-[#D97706]/20"
                     : "text-[#9CA3AF] hover:bg-white/[0.05] hover:text-[#F3F4F6]"
-                }`}
+                  }`}
               >
                 {active && (
                   <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-[#D97706] shadow-sm shadow-[#D97706]" />
                 )}
                 <Icon
-                  className={`h-4.5 w-4.5 transition-colors ${
-                    active
+                  className={`h-4.5 w-4.5 transition-colors ${active
                       ? "text-[#F59E0B]"
                       : "text-[#6B7280] group-hover:text-[#D1D5DB]"
-                  }`}
+                    }`}
                   strokeWidth={2}
                 />
                 {item.label}
@@ -178,13 +194,6 @@ function Sidebar({
 
         {/* Bottom Menu */}
         <div className="space-y-1.5 border-t border-white/[0.08] px-3.5 py-4">
-          <Link
-            href="/dashboard/settings"
-            className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[#9CA3AF] transition-colors hover:bg-white/[0.05] hover:text-[#F3F4F6]"
-          >
-            <Settings className="h-4.5 w-4.5 text-[#6B7280]" strokeWidth={2} />
-            Settings
-          </Link>
           <button
             onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[#EF4444]/80 transition-colors hover:bg-[#EF4444]/10 hover:text-[#EF4444]"
@@ -266,9 +275,8 @@ function Topbar({
               {userRole === "ADMIN" ? "Super Admin" : userRole.toLowerCase()}
             </span>
             <ChevronDown
-              className={`h-4 w-4 text-[#9CA3AF] transition-transform duration-200 ${
-                profileOpen ? "rotate-180" : ""
-              }`}
+              className={`h-4 w-4 text-[#9CA3AF] transition-transform duration-200 ${profileOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
 
@@ -281,12 +289,6 @@ function Topbar({
                 </p>
               </div>
               <div className="pt-1">
-                <Link
-                  href="/dashboard/settings"
-                  className="block rounded-xl px-3 py-2 text-sm font-medium text-[#4B5563] transition-colors hover:bg-[#FAF8F5] hover:text-[#1E2026]"
-                >
-                  Account Settings
-                </Link>
                 <button
                   onClick={handleLogout}
                   className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-[#EF4444] transition-colors hover:bg-[#FEF2F2]"

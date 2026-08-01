@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2, CheckCircle2, AlertCircle, Search, ShieldAlert, ShieldCheck } from "lucide-react";
 import { updateUserStatusAction } from "@/src/actions/admin.actions";
+import Pagination from "@/src/components/share/Pagination";
 
 interface UserListProps {
   initialUsers: any[];
@@ -13,6 +14,8 @@ export default function UserList({ initialUsers }: UserListProps) {
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   // Sync state if initialUsers change
   if (JSON.stringify(users) !== JSON.stringify(initialUsers)) {
@@ -30,7 +33,6 @@ export default function UserList({ initialUsers }: UserListProps) {
 
     if (res.success) {
       setMessage({ type: "success", text: res.message });
-      // Update local state
       setUsers((prev) =>
         prev.map((user) => (user.id === userId ? { ...user, status: nextStatus } : user))
       );
@@ -50,6 +52,12 @@ export default function UserList({ initialUsers }: UserListProps) {
     );
   });
 
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <>
       {/* Search Bar */}
@@ -60,7 +68,10 @@ export default function UserList({ initialUsers }: UserListProps) {
             type="text"
             placeholder="Search users by name, email, or role..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
             className="w-full rounded-xl border border-[#E5E0D8] bg-white pl-10 pr-4 py-2 text-sm text-[#1E2026] outline-none transition-all focus:border-[#D97706] focus:ring-1 focus:ring-[#D97706]"
           />
         </div>
@@ -97,7 +108,7 @@ export default function UserList({ initialUsers }: UserListProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E0D8]/60">
-            {filteredUsers.map((user) => (
+            {paginatedUsers.map((user) => (
               <tr key={user.id} className="transition-colors hover:bg-[#FAF8F5]/50">
                 <td className="whitespace-nowrap px-6 py-4 font-bold text-[#1E2026]">
                   {user.name}
@@ -175,6 +186,16 @@ export default function UserList({ initialUsers }: UserListProps) {
             )}
           </tbody>
         </table>
+
+        <div className="p-4 border-t border-[#E5E0D8]">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => setCurrentPage(page)}
+            totalItems={filteredUsers.length}
+            itemsPerPage={itemsPerPage}
+          />
+        </div>
       </div>
     </>
   );

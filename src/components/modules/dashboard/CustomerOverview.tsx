@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getBookingsAction } from "@/src/actions/booking.actions";
-import { Calendar, CheckCircle2, Clock, DollarSign, Loader2, ArrowRight } from "lucide-react";
+import { getMyTechnicianApplicationAction } from "@/src/actions/technicianApplication.actions";
+import { Calendar, CheckCircle2, Clock, DollarSign, Loader2, ArrowRight, Wrench, Sparkles } from "lucide-react";
 
 interface CustomerOverviewProps {
   user: any;
@@ -11,17 +12,22 @@ interface CustomerOverviewProps {
 
 export default function CustomerOverview({ user }: CustomerOverviewProps) {
   const [bookings, setBookings] = useState<any[]>([]);
+  const [appStatus, setAppStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchBookings = async () => {
+    const fetchData = async () => {
       const res = await getBookingsAction();
       if (res.success && res.data) {
         setBookings(res.data);
       }
+      const appRes = await getMyTechnicianApplicationAction();
+      if (appRes.success && appRes.data) {
+        setAppStatus(appRes.data.status);
+      }
       setLoading(false);
     };
-    fetchBookings();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -74,6 +80,48 @@ export default function CustomerOverview({ user }: CustomerOverviewProps) {
           Manage your scheduled appointments, view invoices, and track booking reviews here.
         </p>
       </div>
+
+      {/* Technician Application Status Banner */}
+      {appStatus === "PENDING" && (
+        <div className="flex items-center justify-between rounded-2xl border border-amber-300 bg-amber-50 p-5 shadow-xs text-amber-900">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-200/60 text-amber-800">
+              <Clock className="h-5 w-5 animate-pulse" />
+            </div>
+            <div>
+              <p className="font-bold text-sm">Technician Application Pending</p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                Your application to become a verified technician is currently under review by the Admin team.
+              </p>
+            </div>
+          </div>
+          <span className="rounded-full bg-amber-200/80 px-3 py-1 text-xs font-bold text-amber-900 hidden sm:inline-block">
+            In Review
+          </span>
+        </div>
+      )}
+
+      {appStatus === "ACCEPTED" && (
+        <div className="flex items-center justify-between rounded-2xl border border-emerald-300 bg-emerald-50 p-5 shadow-xs text-emerald-900">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-200/60 text-emerald-800">
+              <Sparkles className="h-5 w-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="font-bold text-sm">🎉 Application Approved!</p>
+              <p className="text-xs text-emerald-700 mt-0.5">
+                Congratulations! Your Technician application has been accepted. Please refresh or re-login to access your Technician Portal.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/dashboard"
+            className="rounded-xl bg-emerald-700 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-800 transition-colors"
+          >
+            Access Portal
+          </Link>
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">

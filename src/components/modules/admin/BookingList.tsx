@@ -5,6 +5,7 @@ import { Pencil, Trash2, X, Loader2, CheckCircle2, AlertCircle, Search, Filter, 
 import { updateAdminBookingStatusAction, deleteAdminBookingAction } from "@/src/actions/booking.actions";
 import { createPaymentAction } from "@/src/actions/payment.actions";
 import { createReviewAction, updateReviewAction, deleteReviewAction } from "@/src/actions/review.actions";
+import Pagination from "@/src/components/share/Pagination";
 
 interface BookingListProps {
   initialBookings: any[];
@@ -127,6 +128,8 @@ export default function BookingList({ initialBookings, userRole }: BookingListPr
   // Search & Filter state
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   // Sync state if initialBookings change
   if (JSON.stringify(bookings) !== JSON.stringify(initialBookings)) {
@@ -195,6 +198,12 @@ export default function BookingList({ initialBookings, userRole }: BookingListPr
     const matchesStatus = selectedStatus ? b.status === selectedStatus : true;
     return matchesSearch && matchesStatus;
   });
+
+  const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
+  const paginatedBookings = filteredBookings.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const getStatusBadgeStyles = (status: string) => {
     switch (status) {
@@ -278,7 +287,7 @@ export default function BookingList({ initialBookings, userRole }: BookingListPr
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E0D8]/60">
-            {filteredBookings.map((b) => (
+            {paginatedBookings.map((b) => (
               <tr key={b.id} className="transition-colors hover:bg-[#FAF8F5]/50">
                 <td className="px-6 py-4">
                   <div className="font-bold text-[#1E2026]">{b.service?.title || "N/A"}</div>
@@ -405,6 +414,16 @@ export default function BookingList({ initialBookings, userRole }: BookingListPr
             )}
           </tbody>
         </table>
+
+        <div className="p-4 border-t border-[#E5E0D8]">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => setCurrentPage(page)}
+            totalItems={filteredBookings.length}
+            itemsPerPage={itemsPerPage}
+          />
+        </div>
       </div>
 
       {/* Edit Booking Status Modal */}
