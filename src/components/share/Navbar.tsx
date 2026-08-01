@@ -4,8 +4,10 @@ import { Wrench, User, LayoutDashboard } from "lucide-react";
 import NavSearch from "./NavSearch";
 import LogoutButton from "./LogoutButton";
 import MobileMenu from "./MobileMenu";
+import ApplyTechnicianButton from "./ApplyTechnicianButton";
 import { getMeAction } from "../../actions/auth.actions";
 import { getCategories } from "../../actions/category.actions";
+import { getMyTechnicianApplicationAction } from "../../actions/technicianApplication.actions";
 
 const navLinks = [
   { label: "Services", href: "/services" },
@@ -23,6 +25,9 @@ export default async function Navbar() {
 
   const categoriesRes = await getCategories();
   const navbarCategories = categoriesRes?.success ? categoriesRes.data : [];
+
+  const myAppRes = isLoggedIn ? await getMyTechnicianApplicationAction() : null;
+  const applicationStatus = myAppRes?.success && myAppRes.data ? myAppRes.data.status : null;
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#E7E2D8] bg-[#FBFAF7]/95 backdrop-blur supports-[backdrop-filter]:bg-[#FBFAF7]/80">
@@ -58,7 +63,16 @@ export default async function Navbar() {
         <NavSearch categories={navbarCategories} />
 
         {/* Right side Auth Action Buttons */}
-        <div className="ml-auto hidden items-center gap-4 lg:flex">
+        <div className="ml-auto hidden items-center gap-3 lg:flex">
+          {/* Apply to Technician Button */}
+          <ApplyTechnicianButton
+            isLoggedIn={isLoggedIn}
+            userRole={currentUser?.role}
+            userName={currentUser?.name}
+            userEmail={currentUser?.email}
+            applicationStatus={applicationStatus}
+          />
+
           {isLoggedIn ? (
             <>
               <span className="text-xs font-semibold text-[#5B6472]">
@@ -95,7 +109,14 @@ export default async function Navbar() {
         </div>
 
         {/* Mobile menu toggle */}
-        <MobileMenu navLinks={navLinks} isLoggedIn={isLoggedIn} />
+        <MobileMenu
+          navLinks={navLinks}
+          isLoggedIn={isLoggedIn}
+          userRole={currentUser?.role}
+          userName={currentUser?.name}
+          userEmail={currentUser?.email}
+          applicationStatus={applicationStatus}
+        />
       </div>
     </header>
   );

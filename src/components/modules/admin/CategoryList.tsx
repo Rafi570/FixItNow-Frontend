@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Pencil, Trash2, X, Loader2, CheckCircle2, AlertCircle, Plus, FolderKanban } from "lucide-react";
 import { deleteCategoryAction, updateCategoryAction, getTechniciansAction, createServiceAction } from "@/src/actions/admin.actions";
 import { ICategory } from "@/src/types/category";
+import Pagination from "@/src/components/share/Pagination";
 
 interface CategoryListProps {
   initialCategories: ICategory[];
@@ -14,6 +15,8 @@ export default function CategoryList({ initialCategories }: CategoryListProps) {
   const [editCategory, setEditCategory] = useState<ICategory | null>(null);
   const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
   const [addServiceCategory, setAddServiceCategory] = useState<ICategory | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
   
   const [technicians, setTechnicians] = useState<any[]>([]);
   const [loadingTechnicians, setLoadingTechnicians] = useState(false);
@@ -114,6 +117,12 @@ export default function CategoryList({ initialCategories }: CategoryListProps) {
     }
   };
 
+  const totalPages = Math.ceil(categories.length / itemsPerPage);
+  const paginatedCategories = categories.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <>
       {/* Alert Message for inline operations */}
@@ -146,7 +155,7 @@ export default function CategoryList({ initialCategories }: CategoryListProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E0D8]/60">
-            {categories.map((cat) => (
+            {paginatedCategories.map((cat) => (
               <tr key={cat.id} className="transition-colors hover:bg-[#FAF8F5]/50">
                 <td className="whitespace-nowrap px-6 py-4 font-bold text-[#1E2026]">
                   {cat.name}
@@ -198,6 +207,16 @@ export default function CategoryList({ initialCategories }: CategoryListProps) {
             )}
           </tbody>
         </table>
+
+        <div className="p-4 border-t border-[#E5E0D8]">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => setCurrentPage(page)}
+            totalItems={categories.length}
+            itemsPerPage={itemsPerPage}
+          />
+        </div>
       </div>
 
       {/* Edit Category Modal */}

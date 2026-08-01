@@ -42,16 +42,20 @@ export default function Faq() {
     <section className="bg-[#FAF8F5] py-16 lg:py-24">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         
-        {/* Header */}
-        <div className="text-center">
-          <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#D97706]/30 bg-[#D97706]/10 text-[#B45309]">
-            <HelpCircle className="h-5 w-5" />
+        {/* Uniform Header */}
+        <div className="text-center max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#D97706]/30 bg-[#D97706]/10 px-4 py-1.5 text-xs font-bold text-[#D97706] mb-3">
+            <HelpCircle className="h-3.5 w-3.5" />
+            <span>Got Questions?</span>
           </div>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-[#1E2026] sm:text-4xl">
+          <h2
+            className="text-3xl font-extrabold tracking-tight text-[#1E2026] sm:text-4xl"
+            style={{ fontFamily: "'Space Grotesk', ui-sans-serif, system-ui" }}
+          >
             Frequently Asked Questions
           </h2>
-          <p className="mt-3 text-sm text-[#6B707E]">
-            Have questions? We’ve got answers to help you get started with FixItNow.
+          <p className="mt-3 text-sm text-[#6B7280]">
+            Everything you need to know about booking, payments, and verified technicians on FixItNow.
           </p>
         </div>
 

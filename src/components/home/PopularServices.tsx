@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, MapPin, Wrench, Clock, X, Loader2, CheckCircle2, AlertCircle, ArrowRight } from "lucide-react";
+import { Calendar, MapPin, Wrench, Clock, X, Loader2, CheckCircle2, AlertCircle, ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { createBookingAction } from "@/src/actions/booking.actions";
 
@@ -58,26 +58,30 @@ export default function PopularServices({
     <section className="bg-white py-16 border-b border-[#E7E2D8]/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {/* Header */}
-        <div className="mb-10 flex items-end justify-between">
-          <div>
-            <h2
-              className="text-2xl font-bold tracking-tight text-[#1E2026]"
-              style={{ fontFamily: "'Space Grotesk', ui-sans-serif, system-ui" }}
-            >
-              Popular Services
-            </h2>
-            <p className="mt-2 text-sm text-[#6B7280]">
-              Handpicked professional home services highly requested by our customers
-            </p>
+        {/* Center-aligned Uniform Header */}
+        <div className="mb-12 text-center max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#D97706]/30 bg-[#D97706]/10 px-4 py-1.5 text-xs font-bold text-[#D97706] mb-3">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Top Featured Services</span>
           </div>
-
-          <Link
-            href="/services"
-            className="flex items-center gap-1 text-sm font-bold text-[#B45309] hover:underline"
+          <h2
+            className="text-3xl font-extrabold tracking-tight text-[#1E2026] sm:text-4xl"
+            style={{ fontFamily: "'Space Grotesk', ui-sans-serif, system-ui" }}
           >
-            Explore All Services <ArrowRight className="h-4 w-4" />
-          </Link>
+            Popular & Top-Rated Services
+          </h2>
+          <p className="mt-2 text-sm text-[#6B7280]">
+            Handpicked professional home services highly requested by our satisfied customers
+          </p>
+          <div className="mt-4">
+            <Link
+              href="/services"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#B45309] hover:underline bg-[#FAF8F5] border border-[#E7E2D8] px-4 py-2 rounded-xl shadow-xs hover:bg-white transition-all"
+            >
+              <span>Explore All Services</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
         </div>
 
         {/* Services Grid */}

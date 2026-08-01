@@ -4,17 +4,19 @@ import { useState, useEffect } from "react";
 import { Pencil, Trash2, X, Loader2, CheckCircle2, AlertCircle, Search, Filter } from "lucide-react";
 import { updateServiceAction, deleteServiceAction, getTechniciansAction } from "@/src/actions/admin.actions";
 import { ICategory } from "@/src/types/category";
+import Pagination from "@/src/components/share/Pagination";
 
 interface ServiceListProps {
   initialServices: any[];
   categories: ICategory[];
+  currentUser?: any;
 }
 
-export default function ServiceList({ initialServices, categories }: ServiceListProps) {
+export default function ServiceList({ initialServices, categories, currentUser }: ServiceListProps) {
   const [services, setServices] = useState<any[]>(initialServices);
   const [editService, setEditService] = useState<any | null>(null);
   const [deleteServiceId, setDeleteServiceId] = useState<string | null>(null);
-  
+
   const [technicians, setTechnicians] = useState<any[]>([]);
   const [loadingTechnicians, setLoadingTechnicians] = useState(false);
 
@@ -24,6 +26,8 @@ export default function ServiceList({ initialServices, categories }: ServiceList
   // Search & Filter state
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   // Sync state if initialServices change
   if (JSON.stringify(services) !== JSON.stringify(initialServices)) {
@@ -96,11 +100,17 @@ export default function ServiceList({ initialServices, categories }: ServiceList
 
   // Filtered services
   const filteredServices = services.filter((service) => {
-    const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (service.description && service.description.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = selectedCategory ? service.categoryId === selectedCategory : true;
     return matchesSearch && matchesCategory;
   });
+
+  const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
+  const paginatedServices = filteredServices.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <>
@@ -137,11 +147,10 @@ export default function ServiceList({ initialServices, categories }: ServiceList
       {/* Alert Message */}
       {message && !editService && !deleteServiceId && (
         <div
-          className={`mb-4 flex items-center gap-2 rounded-xl p-4 text-sm font-semibold ${
-            message.type === "success"
+          className={`mb-4 flex items-center gap-2 rounded-xl p-4 text-sm font-semibold ${message.type === "success"
               ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
               : "bg-red-50 text-red-700 border border-red-200"
-          }`}
+            }`}
         >
           {message.type === "success" ? (
             <CheckCircle2 className="h-5 w-5 shrink-0" />
@@ -166,7 +175,7 @@ export default function ServiceList({ initialServices, categories }: ServiceList
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E0D8]/60">
-            {filteredServices.map((service) => (
+            {paginatedServices.map((service) => (
               <tr key={service.id} className="transition-colors hover:bg-[#FAF8F5]/50">
                 <td className="px-6 py-4">
                   <div className="font-bold text-[#1E2026]">{service.title}</div>
@@ -216,6 +225,16 @@ export default function ServiceList({ initialServices, categories }: ServiceList
             )}
           </tbody>
         </table>
+
+        <div className="p-4 border-t border-[#E5E0D8]">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => setCurrentPage(page)}
+            totalItems={filteredServices.length}
+            itemsPerPage={itemsPerPage}
+          />
+        </div>
       </div>
 
       {/* Edit Service Modal */}
@@ -244,11 +263,10 @@ export default function ServiceList({ initialServices, categories }: ServiceList
 
             {message && (
               <div
-                className={`mt-4 flex items-center gap-2 rounded-xl p-3 text-xs font-semibold ${
-                  message.type === "success"
+                className={`mt-4 flex items-center gap-2 rounded-xl p-3 text-xs font-semibold ${message.type === "success"
                     ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                     : "bg-red-50 text-red-700 border border-red-200"
-                }`}
+                  }`}
               >
                 {message.type === "success" ? (
                   <CheckCircle2 className="h-4 w-4 shrink-0" />

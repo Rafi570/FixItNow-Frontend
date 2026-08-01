@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, X, Search } from "lucide-react";
 import LogoutButton from "./LogoutButton";
+import ApplyTechnicianButton from "./ApplyTechnicianButton";
 
 interface NavLink {
   label: string;
@@ -12,10 +13,18 @@ interface NavLink {
 
 export default function MobileMenu({ 
   navLinks, 
-  isLoggedIn 
+  isLoggedIn,
+  userRole,
+  userName,
+  userEmail,
+  applicationStatus,
 }: { 
   navLinks: NavLink[]; 
   isLoggedIn: boolean;
+  userRole?: string;
+  userName?: string;
+  userEmail?: string;
+  applicationStatus?: string | null;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -63,7 +72,16 @@ export default function MobileMenu({
             ))}
           </nav>
 
-          <div className="mt-4 flex gap-2 border-t border-[#E7E2D8] pt-4">
+          <div className="mt-4 flex flex-col gap-3 border-t border-[#E7E2D8] pt-4">
+            <div className="px-1">
+              <ApplyTechnicianButton
+                isLoggedIn={isLoggedIn}
+                userRole={userRole}
+                userName={userName}
+                userEmail={userEmail}
+                applicationStatus={applicationStatus}
+              />
+            </div>
             {isLoggedIn ? (
               <div className="w-full flex justify-between items-center px-2">
                 <Link
@@ -76,7 +94,7 @@ export default function MobileMenu({
                 <LogoutButton />
               </div>
             ) : (
-              <>
+              <div className="flex gap-2">
                 <Link
                   href="/login"
                   onClick={() => setMobileOpen(false)}
@@ -91,7 +109,7 @@ export default function MobileMenu({
                 >
                   Get started
                 </Link>
-              </>
+              </div>
             )}
           </div>
         </div>

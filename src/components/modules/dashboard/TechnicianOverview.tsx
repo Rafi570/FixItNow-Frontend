@@ -1,28 +1,83 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { getBookingsAction } from "@/src/actions/booking.actions";
-import { Calendar, CheckCircle2, Clock, DollarSign, Loader2, ArrowRight } from "lucide-react";
+import { getCategories } from "@/src/actions/category.actions";
+import { createTechnicianServiceAction } from "@/src/actions/service.actions";
+import { Calendar, CheckCircle2, Clock, DollarSign, Loader2, ArrowRight, Plus, Wrench, X, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface TechnicianOverviewProps {
   user: any;
 }
 
 export default function TechnicianOverview({ user }: TechnicianOverviewProps) {
+  const router = useRouter();
   const [bookings, setBookings] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Modal states
+  const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
   useEffect(() => {
-    const fetchBookings = async () => {
-      const res = await getBookingsAction();
-      if (res.success && res.data) {
-        setBookings(res.data);
+    const fetchData = async () => {
+      const [bookingsRes, categoriesRes] = await Promise.all([
+        getBookingsAction(),
+        getCategories(),
+      ]);
+
+      if (bookingsRes.success && bookingsRes.data) {
+        setBookings(bookingsRes.data);
       }
+
+      if (categoriesRes.success && categoriesRes.data) {
+        setCategories(categoriesRes.data);
+      }
+
       setLoading(false);
     };
-    fetchBookings();
+
+    fetchData();
   }, []);
+
+  const handleCreateService = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setMessage(null);
+
+    const formData = new FormData(e.currentTarget);
+    const title = formData.get("title") as string;
+    const description = formData.get("description") as string;
+    const price = Number(formData.get("price"));
+    const durationMins = formData.get("durationMins") ? Number(formData.get("durationMins")) : undefined;
+    const categoryId = formData.get("categoryId") as string;
+
+    const res = await createTechnicianServiceAction({
+      title,
+      description,
+      price,
+      durationMins,
+      categoryId,
+    });
+
+    setSubmitting(false);
+
+    if (res.success) {
+      setMessage({ type: "success", text: res.message || "Service added successfully!" });
+      setTimeout(() => {
+        setIsAddServiceOpen(false);
+        setMessage(null);
+        router.refresh();
+      }, 1500);
+    } else {
+      setMessage({ type: "error", text: res.message || "Failed to add service" });
+    }
+  };
 
   if (loading) {
     return (
@@ -65,11 +120,35 @@ export default function TechnicianOverview({ user }: TechnicianOverviewProps) {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#171B21] to-[#2A303B] p-8 text-white shadow-xs">
-        <h1 className="text-2xl font-extrabold tracking-tight">Welcome back, Expert {user.name}!</h1>
-        <p className="mt-2 text-sm text-gray-300">
-          Monitor your assigned service bookings, accept requested appointments, and track your total earnings.
-        </p>
+      <div className="rounded-2xl bg-gradient-to-r from-[#171B21] to-[#2A303B] p-8 text-white shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Verified Technician Active
+            </span>
+          </div>
+          <h1 className="text-2xl font-extrabold tracking-tight mt-2">Welcome back, Expert {user.name}!</h1>
+          <p className="mt-1 text-sm text-gray-300">
+            Monitor assigned bookings, accept requested appointments, or add new services under Admin categories.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link
+            href="/dashboard/my-services"
+            className="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-xs font-bold text-white shadow-lg backdrop-blur-xs transition-all hover:bg-white/20 active:scale-[0.98]"
+          >
+            <Wrench className="h-4 w-4 text-[#E8912B]" />
+            My Services
+          </Link>
+          <button
+            onClick={() => setIsAddServiceOpen(true)}
+            className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#E8912B] px-5 py-3 text-xs font-bold text-white shadow-lg transition-all hover:bg-[#d47f1e] active:scale-[0.98]"
+          >
+            <Plus className="h-4 w-4" />
+            Add Service
+          </button>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -186,6 +265,151 @@ export default function TechnicianOverview({ user }: TechnicianOverviewProps) {
           </div>
         )}
       </div>
+
+      {/* Technician Add Service Modal */}
+      {isAddServiceOpen && (
+        <div
+          onClick={() => setIsAddServiceOpen(false)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-md animate-in fade-in duration-200"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative my-auto w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl border border-[#E7E2D8] bg-[#FBFAF7] p-6 shadow-2xl sm:p-8 animate-in zoom-in-95 duration-150"
+          >
+            <button
+              onClick={() => setIsAddServiceOpen(false)}
+              className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-[#EFECE6] text-[#5B6472] transition-colors hover:bg-[#E2DDD3] hover:text-[#171B21]"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="flex items-center gap-3 border-b border-[#E5E0D8] pb-4">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#171B21] text-[#E8912B]">
+                <Wrench className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#171B21]">Add Service to Dashboard</h3>
+                <p className="text-xs font-medium text-[#5B6472]">
+                  Offer a new service under Admin Categories
+                </p>
+              </div>
+            </div>
+
+            {message && (
+              <div
+                className={`mt-4 flex items-center gap-2 rounded-xl p-3 text-xs font-semibold ${
+                  message.type === "success"
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    : "bg-red-50 text-red-700 border border-red-200"
+                }`}
+              >
+                {message.type === "success" ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                )}
+                <span>{message.text}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateService} className="mt-4 space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#5B6472]">
+                  Service Title *
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  required
+                  placeholder="e.g. AC Installation & Maintenance"
+                  className="mt-1 w-full rounded-xl border border-[#E7E2D8] bg-white px-3.5 py-2.5 text-sm font-medium text-[#171B21] focus:border-[#E8912B] focus:outline-none focus:ring-1 focus:ring-[#E8912B]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#5B6472]">
+                  Select Admin Category *
+                </label>
+                <select
+                  name="categoryId"
+                  required
+                  defaultValue=""
+                  className="mt-1 w-full rounded-xl border border-[#E7E2D8] bg-white px-3.5 py-2.5 text-sm font-semibold text-[#171B21] focus:border-[#E8912B] focus:outline-none focus:ring-1 focus:ring-[#E8912B]"
+                >
+                  <option value="" disabled>
+                    -- Select Category --
+                  </option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#5B6472]">
+                    Price ($) *
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    required
+                    min="1"
+                    placeholder="e.g. 50"
+                    className="mt-1 w-full rounded-xl border border-[#E7E2D8] bg-white px-3.5 py-2.5 text-sm font-medium text-[#171B21] focus:border-[#E8912B] focus:outline-none focus:ring-1 focus:ring-[#E8912B]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#5B6472]">
+                    Duration (Mins)
+                  </label>
+                  <input
+                    type="number"
+                    name="durationMins"
+                    placeholder="e.g. 60"
+                    className="mt-1 w-full rounded-xl border border-[#E7E2D8] bg-white px-3.5 py-2.5 text-sm font-medium text-[#171B21] focus:border-[#E8912B] focus:outline-none focus:ring-1 focus:ring-[#E8912B]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#5B6472]">
+                  Service Description
+                </label>
+                <textarea
+                  name="description"
+                  rows={3}
+                  placeholder="Details of the service package offered..."
+                  className="mt-1 w-full rounded-xl border border-[#E7E2D8] bg-white px-3.5 py-2.5 text-sm font-medium text-[#171B21] focus:border-[#E8912B] focus:outline-none focus:ring-1 focus:ring-[#E8912B]"
+                />
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#171B21] py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-[#2A303B] active:scale-[0.99] disabled:opacity-50"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Publishing Service...
+                    </>
+                  ) : (
+                    <>
+                      <Wrench className="h-4 w-4 text-[#E8912B]" />
+                      Publish Service to Platform
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

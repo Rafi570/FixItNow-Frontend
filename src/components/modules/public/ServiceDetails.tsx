@@ -62,7 +62,8 @@ export default function ServiceDetails({
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 bg-[#FAF8F5]">
+    <div className="w-full min-h-screen bg-[#FAF8F5]">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Back Button */}
       <Link
         href="/services"
@@ -346,6 +347,7 @@ export default function ServiceDetails({
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

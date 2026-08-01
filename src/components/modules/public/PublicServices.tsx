@@ -158,7 +158,8 @@ export default function PublicServices({
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 bg-[#FAF8F5]">
+    <div className="w-full min-h-screen bg-[#FAF8F5]">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Top Banner */}
       <div className="mb-8 rounded-2xl bg-gradient-to-r from-[#171B21] to-[#2A303B] p-8 text-white">
         <h1 className="text-3xl font-extrabold tracking-tight">Professional Services Directory</h1>
@@ -526,6 +527,7 @@ export default function PublicServices({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

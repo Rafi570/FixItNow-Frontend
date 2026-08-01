@@ -17,7 +17,8 @@ export default function TechniciansList({ initialTechnicians }: TechniciansListP
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 bg-[#FAF8F5]">
+    <div className="w-full min-h-screen bg-[#FAF8F5]">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-10 text-center max-w-2xl mx-auto">
         <h1 className="text-3xl font-extrabold tracking-tight text-[#1E2026]">
@@ -48,8 +49,14 @@ export default function TechniciansList({ initialTechnicians }: TechniciansListP
               </h3>
               <div className="mt-1 flex items-center gap-1 text-xs text-[#D97706] font-bold">
                 <Star className="h-3.5 w-3.5 fill-[#D97706]" />
-                <span>{tech.ratingAvg ? Number(tech.ratingAvg).toFixed(1) : "5.0"}</span>
-                <span className="text-[#9CA3AF] font-normal">({tech.ratingCount || 0} reviews)</span>
+                <span>
+                  {(tech.totalReviews ?? tech.reviews?.length ?? 0) > 0
+                    ? Number(tech.ratingAvg || 0).toFixed(1)
+                    : "0.0"}
+                </span>
+                <span className="text-[#9CA3AF] font-normal">
+                  ({tech.totalReviews ?? tech.reviews?.length ?? 0} reviews)
+                </span>
               </div>
 
               <div className="mt-4 space-y-2">
@@ -127,8 +134,14 @@ export default function TechniciansList({ initialTechnicians }: TechniciansListP
                 </h2>
                 <div className="mt-1 flex items-center gap-1.5 text-sm text-[#D97706] font-bold">
                   <Star className="h-4 w-4 fill-[#D97706]" />
-                  <span>{selectedTech.ratingAvg ? Number(selectedTech.ratingAvg).toFixed(1) : "5.0"}</span>
-                  <span className="text-[#9CA3AF] font-normal">({selectedTech.ratingCount || 0} reviews)</span>
+                  <span>
+                    {(selectedTech.totalReviews ?? selectedTech.reviews?.length ?? 0) > 0
+                      ? Number(selectedTech.ratingAvg || 0).toFixed(1)
+                      : "0.0"}
+                  </span>
+                  <span className="text-[#9CA3AF] font-normal">
+                    ({selectedTech.totalReviews ?? selectedTech.reviews?.length ?? 0} reviews)
+                  </span>
                 </div>
               </div>
             </div>
@@ -204,6 +217,7 @@ export default function TechniciansList({ initialTechnicians }: TechniciansListP
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

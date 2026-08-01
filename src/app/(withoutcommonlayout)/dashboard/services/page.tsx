@@ -1,8 +1,20 @@
 import { getServicesAction } from "@/src/actions/service.actions";
 import { getCategories } from "@/src/actions/category.actions";
+import { getMeAction } from "@/src/actions/auth.actions";
 import ServiceList from "@/src/components/modules/admin/ServiceList";
+import { redirect } from "next/navigation";
 
 export default async function AdminServicesPage() {
+  const meRes = await getMeAction();
+  
+  if (meRes.data?.role === "TECHNICIAN") {
+    redirect("/dashboard/my-services");
+  }
+
+  if (!meRes.success || meRes.data?.role !== "ADMIN") {
+    redirect("/dashboard");
+  }
+
   const [servicesRes, categoriesRes] = await Promise.all([
     getServicesAction(),
     getCategories(),
@@ -17,16 +29,16 @@ export default async function AdminServicesPage() {
       <div className="flex items-center justify-between border-b border-[#E5E0D8] pb-5">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-[#1E2026]">
-            Services
+            Platform Services Management
           </h1>
           <p className="text-sm text-[#6B7280]">
-            Manage, edit, delete, or search service posts across all categories
+            Admin panel to view, edit, or remove service offerings across all platform technicians
           </p>
         </div>
       </div>
 
       {/* Services Table and Filter Component */}
-      <ServiceList initialServices={services} categories={categories} />
+      <ServiceList initialServices={services} categories={categories} currentUser={meRes.data} />
     </div>
   );
 }
