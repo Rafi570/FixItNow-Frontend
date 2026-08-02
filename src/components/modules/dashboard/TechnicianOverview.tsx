@@ -120,30 +120,30 @@ export default function TechnicianOverview({ user }: TechnicianOverviewProps) {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#171B21] to-[#2A303B] p-8 text-white shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="rounded-2xl bg-gradient-to-r from-[#171B21] to-[#2A303B] p-6 sm:p-8 text-white shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Verified Technician Active
             </span>
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight mt-2">Welcome back, Expert {user.name}!</h1>
-          <p className="mt-1 text-sm text-gray-300">
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight mt-2">Welcome back, Expert {user.name}!</h1>
+          <p className="mt-1 text-xs sm:text-sm text-gray-300">
             Monitor assigned bookings, accept requested appointments, or add new services under Admin categories.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
           <Link
             href="/dashboard/my-services"
-            className="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-xs font-bold text-white shadow-lg backdrop-blur-xs transition-all hover:bg-white/20 active:scale-[0.98]"
+            className="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 sm:py-3 text-xs font-bold text-white shadow-lg backdrop-blur-xs transition-all hover:bg-white/20 active:scale-[0.98]"
           >
             <Wrench className="h-4 w-4 text-[#E8912B]" />
             My Services
           </Link>
           <button
             onClick={() => setIsAddServiceOpen(true)}
-            className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#E8912B] px-5 py-3 text-xs font-bold text-white shadow-lg transition-all hover:bg-[#d47f1e] active:scale-[0.98]"
+            className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#E8912B] px-5 py-2.5 sm:py-3 text-xs font-bold text-white shadow-lg transition-all hover:bg-[#d47f1e] active:scale-[0.98]"
           >
             <Plus className="h-4 w-4" />
             Add Service
@@ -152,7 +152,7 @@ export default function TechnicianOverview({ user }: TechnicianOverviewProps) {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* Total Earnings */}
         <div className="rounded-2xl border border-[#E7E2D8] bg-white p-6 shadow-xs flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">

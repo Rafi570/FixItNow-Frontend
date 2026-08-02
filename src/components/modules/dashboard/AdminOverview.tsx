@@ -99,7 +99,7 @@ export default function AdminOverview({ user }: AdminOverviewProps) {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {/* Total System Revenue */}
         <div className="rounded-2xl border border-[#E7E2D8] bg-white p-5 shadow-xs flex items-center gap-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 shrink-0">

@@ -12,11 +12,9 @@ import {
   Wrench,
   Settings,
   LogOut,
-  Bell,
   Menu,
   X,
   ChevronDown,
-  ShieldAlert,
   User,
   Star,
   PlusCircle,
@@ -115,6 +113,7 @@ function Sidebar({
   );
 
   const handleLogout = async () => {
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     await logoutAction();
     window.location.href = "/";
   };
@@ -217,10 +216,29 @@ function Topbar({
   userRole: string;
 }) {
   const [profileOpen, setProfileOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState<string>("");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(
+        now.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        })
+      );
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = async () => {
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     await logoutAction();
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   return (
@@ -246,29 +264,28 @@ function Topbar({
       </div>
 
       {/* Right Controls */}
-      <div className="flex items-center gap-3">
-        {userRole === "ADMIN" && (
-          <span className="hidden items-center gap-1.5 rounded-full border border-[#D97706]/20 bg-[#D97706]/10 px-3 py-1 text-xs font-bold text-[#B45309] sm:flex">
-            <ShieldAlert className="h-3.5 w-3.5" /> System Live
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* System Live Status with Real-time Clock */}
+        <div className="flex items-center gap-1.5 sm:gap-2 rounded-full border border-[#10B981]/25 bg-[#10B981]/10 px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-semibold text-[#047857] shadow-sm">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#10B981] opacity-75"></span>
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#10B981]"></span>
           </span>
-        )}
-
-        {/* Notifications Button */}
-        <button
-          className="relative flex h-10 w-10 items-center justify-center rounded-full border border-[#E5E0D8] bg-white text-[#5C616E] shadow-sm transition-all hover:bg-[#F4EFE6] hover:text-[#1E2026]"
-          aria-label="Notifications"
-        >
-          <Bell className="h-4.5 w-4.5" />
-          <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-[#D97706] ring-2 ring-white" />
-        </button>
+          <span className="hidden xs:inline font-bold tracking-wide">System Live</span>
+          {currentTime && (
+            <span className="border-l border-[#10B981]/30 pl-1.5 sm:pl-2 font-mono text-[10px] sm:text-[11px] font-semibold text-[#065F46]">
+              {currentTime}
+            </span>
+          )}
+        </div>
 
         {/* Profile Dropdown */}
         <div className="relative">
           <button
             onClick={() => setProfileOpen((v) => !v)}
-            className="flex items-center gap-2.5 rounded-full border border-[#E5E0D8] bg-white p-1 pr-3 shadow-sm transition-all hover:border-[#D97706]/30"
+            className="flex items-center gap-2 rounded-full border border-[#E5E0D8] bg-white p-1 pr-2 sm:pr-3 shadow-sm transition-all hover:border-[#D97706]/30"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-[#D97706] to-[#B45309] text-xs font-bold text-white shadow-sm uppercase">
+            <span className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-gradient-to-r from-[#D97706] to-[#B45309] text-xs font-bold text-white shadow-sm uppercase">
               {userEmail ? userEmail[0] : "U"}
             </span>
             <span className="hidden text-sm font-bold text-[#1E2026] sm:block capitalize">
@@ -349,13 +366,13 @@ export default function AdminLayout({
         userRole={userRole}
       />
 
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-screen flex-1 flex-col min-w-0">
         <Topbar
           onMenuClick={() => setMobileOpen(true)}
           userEmail={userEmail}
           userRole={userRole}
         />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 min-w-0">{children}</main>
       </div>
     </div>
   );

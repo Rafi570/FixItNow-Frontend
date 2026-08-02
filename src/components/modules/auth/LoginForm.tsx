@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Lock, Mail, Loader2, ArrowRight } from "lucide-react";
 import { loginAction } from "@/src/actions/auth.actions";
 import AuthError from "./AuthError";
@@ -58,16 +57,10 @@ export default function LoginForm() {
 
       {/* Password Field */}
       <div>
-        <div className="mb-1.5 flex items-center justify-between">
+        <div className="mb-1.5">
           <label className="block text-xs font-bold uppercase tracking-wider text-[#1E2026]">
             Password
           </label>
-          <Link
-            href="/forgot-password"
-            className="text-xs font-semibold text-[#B45309] hover:underline"
-          >
-            Forgot password?
-          </Link>
         </div>
         <div className="relative">
           <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />

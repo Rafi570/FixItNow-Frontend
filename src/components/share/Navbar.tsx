@@ -39,7 +39,7 @@ export default async function Navbar() {
             <Wrench className="h-5 w-5 text-[#E8912B]" strokeWidth={2.25} />
           </span>
           <span
-            className="hidden text-lg font-semibold tracking-tight text-[#171B21] sm:block"
+            className="inline-block text-base sm:text-lg font-semibold tracking-tight text-[#171B21]"
             style={{ fontFamily: "'Space Grotesk', ui-sans-serif, system-ui" }}
           >
             FixIt<span className="text-[#E8912B]">Now</span>

@@ -28,6 +28,13 @@ export default function MobileMenu({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      window.location.href = `/services?search=${encodeURIComponent(query.trim())}`;
+      setMobileOpen(false);
+    }
+  };
 
   return (
     <>
@@ -41,7 +48,7 @@ export default function MobileMenu({
 
       {mobileOpen && (
         <div className="absolute left-0 top-16 w-full border-t border-[#E7E2D8] bg-[#FBFAF7] px-4 py-4 md:px-6 lg:hidden shadow-lg">
-          <form onSubmit={(e) => e.preventDefault()} className="mb-4">
+          <form onSubmit={handleSearch} className="mb-4">
             <div className="flex items-center overflow-hidden rounded-full border border-[#E7E2D8] bg-white">
               <input
                 type="text"

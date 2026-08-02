@@ -29,8 +29,9 @@ export default function PublicServices({
   const [maxPrice, setMaxPrice] = useState<number | "">("");
   const [sortOption, setSortOption] = useState<string>("default");
 
-  // Booking states
+  // Booking & Details states
   const [bookingService, setBookingService] = useState<any | null>(null);
+  const [selectedDetailService, setSelectedDetailService] = useState<any | null>(null);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingMessage, setBookingMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -315,9 +316,12 @@ export default function PublicServices({
 
                   {/* Title & Desc */}
                   <h3 className="text-md font-bold text-[#1E2026] line-clamp-1 group-hover:text-[#B45309] transition-colors">
-                    <Link href={`/services/${service.id}`} className="hover:underline">
+                    <button
+                      onClick={() => setSelectedDetailService(service)}
+                      className="hover:underline text-left"
+                    >
                       {service.title}
-                    </Link>
+                    </button>
                   </h3>
                   <p className="mt-2 text-xs text-[#6B7280] line-clamp-3 min-h-[48px]">
                     {service.description || "No service details provided."}
@@ -345,12 +349,12 @@ export default function PublicServices({
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Link
-                      href={`/services/${service.id}`}
+                    <button
+                      onClick={() => setSelectedDetailService(service)}
                       className="rounded-xl border border-[#E7E2D8] bg-white px-3.5 py-2 text-xs font-bold text-[#4B5563] transition-all hover:bg-[#FAF8F5] hover:text-[#1E2026] shadow-xs"
                     >
                       Details
-                    </Link>
+                    </button>
                     <button
                       onClick={() => setBookingService(service)}
                       className="rounded-xl bg-[#171B21] hover:bg-[#E8912B] hover:text-[#171B21] px-3.5 py-2 text-xs font-bold text-white transition-all shadow-sm"
@@ -524,6 +528,197 @@ export default function PublicServices({
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Service Details Modal Popup */}
+      {selectedDetailService && (
+        <div
+          onClick={() => {
+            setSelectedDetailService(null);
+            setBookingMessage(null);
+          }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative my-auto w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[#E7E2D8] bg-[#FBFAF7] p-6 shadow-2xl sm:p-8 animate-in zoom-in-95 duration-150"
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setSelectedDetailService(null);
+                setBookingMessage(null);
+              }}
+              className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-[#EFECE6] text-[#5B6472] transition-colors hover:bg-[#E2DDD3] hover:text-[#171B21]"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {/* Header Banner */}
+            <div className="rounded-2xl bg-gradient-to-r from-[#171B21] to-[#2A303B] p-6 text-white shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <span className="inline-flex items-center rounded-full bg-[#D97706]/20 px-3 py-1 text-xs font-bold text-[#FBBF24]">
+                    {selectedDetailService.category?.name || "Service Category"}
+                  </span>
+                  <h2 className="mt-2 text-xl sm:text-2xl font-extrabold tracking-tight">
+                    {selectedDetailService.title}
+                  </h2>
+                </div>
+                <div className="text-left sm:text-right shrink-0">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Rate</span>
+                  <div className="text-3xl font-extrabold text-[#FBBF24] mt-0.5">
+                    ${selectedDetailService.price}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Content Details */}
+            <div className="mt-6 space-y-5">
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">Service Description</h3>
+                <p className="mt-2 text-xs sm:text-sm text-[#1E2026] leading-relaxed whitespace-pre-line bg-white p-4 rounded-xl border border-[#E7E2D8]">
+                  {selectedDetailService.description || "No specific details provided for this service."}
+                </p>
+              </div>
+
+              {/* Technician Info */}
+              <div className="rounded-xl bg-white p-4 border border-[#E7E2D8] space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#D97706]/10 text-[#D97706]">
+                      <Wrench className="h-4.5 w-4.5" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B7280]">Service Provider</p>
+                      <p className="text-sm font-bold text-[#1E2026]">
+                        {selectedDetailService.technician?.user?.name || "Verified Technician"}
+                      </p>
+                    </div>
+                  </div>
+                  {selectedDetailService.durationMins && (
+                    <span className="flex items-center gap-1 text-xs font-semibold text-[#5B6472] bg-[#FAF8F5] px-3 py-1.5 rounded-lg border border-[#E7E2D8]">
+                      <Clock className="h-3.5 w-3.5 text-[#D97706]" /> {selectedDetailService.durationMins} Mins
+                    </span>
+                  )}
+                </div>
+                {selectedDetailService.technician?.location && (
+                  <div className="flex items-center gap-2 text-xs text-[#6B7280] pt-1">
+                    <MapPin className="h-3.5 w-3.5 shrink-0 text-[#D97706]" />
+                    <span>Location: {selectedDetailService.technician.location}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Instant Booking Action inside Modal */}
+              <div className="pt-4 border-t border-[#E7E2D8]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E2026] mb-3">Book This Service</h3>
+                
+                {bookingMessage && (
+                  <div
+                    className={`mb-4 flex items-center gap-2 rounded-xl p-3 text-xs font-semibold ${
+                      bookingMessage.type === "success"
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : "bg-red-50 text-red-700 border border-red-200"
+                    }`}
+                  >
+                    {bookingMessage.type === "success" ? (
+                      <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                    )}
+                    <span>{bookingMessage.text}</span>
+                  </div>
+                )}
+
+                {!isLoggedIn ? (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center">
+                    <p className="text-xs text-amber-800 font-semibold mb-3">
+                      Please log in as a Customer to book this service.
+                    </p>
+                    <button
+                      onClick={() => router.push(`/login?redirect=/services`)}
+                      className="rounded-xl bg-[#171B21] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#2A303B] transition-colors"
+                    >
+                      Log In Now
+                    </button>
+                  </div>
+                ) : currentUser?.role !== "CUSTOMER" ? (
+                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center">
+                    <p className="text-xs text-red-800 font-semibold">
+                      Only Customer accounts can book services. You are logged in as {currentUser?.role}.
+                    </p>
+                  </div>
+                ) : (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      setBookingService(selectedDetailService);
+                      handleBookingSubmit(e);
+                    }}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#4B5563]">
+                        Scheduled Date & Time *
+                      </label>
+                      <input
+                        type="datetime-local"
+                        name="scheduledAt"
+                        required
+                        className="mt-1 w-full rounded-xl border border-[#E7E2D8] bg-white px-3.5 py-2.5 text-sm text-[#1E2026] outline-none focus:border-[#D97706]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#4B5563]">
+                        Service Address *
+                      </label>
+                      <input
+                        type="text"
+                        name="address"
+                        required
+                        placeholder="e.g. House 45, Road 12, Gulshan, Dhaka"
+                        className="mt-1 w-full rounded-xl border border-[#E7E2D8] bg-white px-3.5 py-2.5 text-sm text-[#1E2026] outline-none focus:border-[#D97706]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#4B5563]">
+                        Special Instructions / Notes
+                      </label>
+                      <textarea
+                        name="note"
+                        rows={2}
+                        placeholder="Any specific requirement or instructions for the technician..."
+                        className="mt-1 w-full rounded-xl border border-[#E7E2D8] bg-white px-3.5 py-2.5 text-sm text-[#1E2026] outline-none focus:border-[#D97706]"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={bookingLoading}
+                      className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#D97706] hover:bg-[#B45309] py-3 text-sm font-bold text-white shadow-md transition-all active:scale-[0.99] disabled:opacity-50"
+                    >
+                      {bookingLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Confirming Booking...
+                        </>
+                      ) : (
+                        <>
+                          <Calendar className="h-4 w-4" />
+                          Confirm & Schedule Booking (${selectedDetailService.price})
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
