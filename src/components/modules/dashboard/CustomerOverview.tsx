@@ -124,7 +124,7 @@ export default function CustomerOverview({ user }: CustomerOverviewProps) {
       )}
 
       {/* Stats Grid */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* Total Spent */}
         <div className="rounded-2xl border border-[#E7E2D8] bg-white p-6 shadow-xs flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">

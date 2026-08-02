@@ -57,7 +57,7 @@ export default function PopularServices({
   return (
     <section className="bg-white py-16 border-b border-[#E7E2D8]/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        
+
         {/* Center-aligned Uniform Header */}
         <div className="mb-12 text-center max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#D97706]/30 bg-[#D97706]/10 px-4 py-1.5 text-xs font-bold text-[#D97706] mb-3">
@@ -183,11 +183,10 @@ export default function PopularServices({
 
             {bookingMessage && (
               <div
-                className={`mt-4 flex items-center gap-2 rounded-xl p-3 text-xs font-semibold ${
-                  bookingMessage.type === "success"
+                className={`mt-4 flex items-center gap-2 rounded-xl p-3 text-xs font-semibold ${bookingMessage.type === "success"
                     ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                     : "bg-red-50 text-red-700 border border-red-200"
-                }`}
+                  }`}
               >
                 {bookingMessage.type === "success" ? (
                   <CheckCircle2 className="h-4 w-4 shrink-0" />

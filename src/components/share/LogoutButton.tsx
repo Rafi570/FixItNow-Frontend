@@ -8,13 +8,9 @@ export default function LogoutButton() {
   const router = useRouter();
 
   const handleLogout = async () => {
-    // ১. কুকি মুছে ফেলা
-    await logoutAction();
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    
-    // ২. পেজ রিফ্রেশ করে লগইন পেজে রিডাইরেক্ট
-    router.replace("/");
-    router.refresh();
+    await logoutAction();
+    window.location.href = "/";
   };
 
   return (
