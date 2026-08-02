@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { ActionResponse, LoginResponse, RegisterResponse } from "../types/auth";
 
 // ১. গ্লোবালি Base URL ডিক্লেয়ার করুন dynamic env থেকে
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://fix-it-now-prisma-backend.vercel.app/api";
 
 export async function registerAction(formData: FormData): Promise<ActionResponse> {
   const name = formData.get("name") as string;
