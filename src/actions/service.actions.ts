@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { revalidatePath, updateTag } from "next/cache";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://fix-it-now-prisma-backend.vercel.app/api";
 
 async function getAuthHeader() {
   const cookieStore = await cookies();
